@@ -30,7 +30,6 @@ ZIP, ZIPX, RAR, TAR, 7Z, JAR, ISO, XZ, GZ, BZ2
 * Graph<br>
 	* Directed Graph *<br>
 	* Undirected Graph *<br>
-<br>
 
 ## Sorting Utility<br>
 * Selection Sort<br>
@@ -41,7 +40,6 @@ ZIP, ZIPX, RAR, TAR, 7Z, JAR, ISO, XZ, GZ, BZ2
 * Heap Sort *<br>
 * Radix Sort *<br>
 * Custom Sort<br>
-<br>
 
 ## File Utility<br>
 * Create batch folders
