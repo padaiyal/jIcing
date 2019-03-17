@@ -7,27 +7,45 @@ import utilities.RegexUtility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class RegexUtilityTest {
+class RegexUtilityTest {
 
     @Test
-    public void testMatches() {
-        Assertions.assertTrue(RegexUtility.matches("\\d+\\s+\\S+", 0, "1290 TestString"),
+    void testMatches() {
+        Assertions.assertTrue(
+                RegexUtility.matches("\\d+\\s+\\S+",
+                        0,
+                        "1290 TestString"),
                 "Regex should've matched the provided string."
         );
     }
 
+
     /**
      *
-     * @param pattern
-     * @param input
-     * @param expectedMatches
-     * @return
      */
-    public List<List<String>> testGetGroupsIfMatches(String pattern, String input, List<List<String>> expectedMatches) {
-        List<List<String>> actualMatches = RegexUtility.getFirstNMatches(pattern, 0, -1, input);
-        List<List<String>> actualMinusExpected, expectedMinusActual;
-        Assertions.assertTrue(actualMatches!=null, "No matches found, RegexUtility.getFirstNMatches() returned null.");
+    @Test
+    void testGetAllMatches() throws RegexUtility.InvalidRegexException {
+        String pattern = "(\\d+)\\.(\\d+)";
+        String input;
+        List<List<String>> expectedMatches = Arrays.asList(
+                Arrays.asList("99.99999999", "99", "99999999"),
+                Arrays.asList("8.666666", "8", "666666"),
+                Arrays.asList("983242342345.2545364356453", "983242342345", "2545364356453"),
+                Arrays.asList("88.88", "88", "88")
+        );
+        List<List<String>> actualMatches,
+                actualMinusExpected,
+                expectedMinusActual;
+
+        input = expectedMatches.stream()
+                .map(expectedMatch -> expectedMatch.get(0))
+                .reduce("", (eM1, eM2) -> eM1 + " " + eM2);
+
+        actualMatches = RegexUtility.getAllMatches(pattern, 0, input);
+
+        Assertions.assertNotNull(actualMatches, "No matches found, RegexUtility.getFirstNMatches() returned null.");
         expectedMinusActual = new ArrayList<>(expectedMatches);
         actualMatches.stream()
                 .filter(actualMatch -> expectedMinusActual.indexOf(actualMatch) >= 0)
@@ -36,31 +54,49 @@ public class RegexUtilityTest {
         expectedMatches.stream()
                 .filter(expectedMatch -> actualMinusExpected.indexOf(expectedMatch) >= 0)
                 .forEach(expectedMatch -> actualMinusExpected.remove(actualMinusExpected.indexOf(expectedMatch)));
-        Assertions.assertTrue(expectedMinusActual.size() == 0, "Actual matches don't contain all expected matches.\nExpectedMatches - ActualMatches = "+expectedMinusActual+"\n");
-        Assertions.assertTrue(actualMinusExpected.size() == 0, "Expected matches don't contain all actual matches.\nActualMatches - ExpectedMatches = "+actualMinusExpected+"\n");
-        return actualMatches;
-    }
-
-    /**
-     *
-     */
-    @Test
-    public void testGetGroupsIfMatches1() {
-        List<List<String>> expectedMatches = new ArrayList<>();
-        expectedMatches.add(Arrays.asList("99.99999999", "99", "99999999"));
-        expectedMatches.add(Arrays.asList("8.666666", "8", "666666"));
-        expectedMatches.add(Arrays.asList("983242342345.2545364356453", "983242342345", "2545364356453"));
-        expectedMatches.add(Arrays.asList("99.99999999", "99", "99999999"));
-        expectedMatches.add(Arrays.asList("88.88", "88", "88"));
-        testGetGroupsIfMatches("(\\d+)\\.(\\d+)", "99.99999999 99.99999999 88.88 8.666666 \n 983242342345.2545364356453", expectedMatches);
+        Assertions.assertEquals(0, expectedMinusActual.size(), "Actual matches don't contain all expected matches.\nExpectedMatches - ActualMatches = " + expectedMinusActual + "\n");
+        Assertions.assertEquals(0, actualMinusExpected.size(), "Expected matches don't contain all actual matches.\nActualMatches - ExpectedMatches = " + actualMinusExpected + "\n");
     }
 
     /**
      * Test RegexUtility::getFirstNMatches with some known field regexps
      */
     @Test
-    public void testFieldRegexMatches() {
+    void testGetFirstNMatches() {
 
     }
+
+    @Test
+    void testFillRandomValues() throws RegexUtility.InvalidRegexException {
+        List<String> regexsToTest = Arrays.asList(
+                "\\w",
+                "\\w+",
+                "\\w*",
+                "\\s",
+                "\\s+",
+                "\\s*",
+                "\\d",
+                "\\d+",
+                "\\d*",
+                "[abz]*"
+        );
+        for(String regexToTest:regexsToTest) {
+            String generatedString = RegexUtility.fillRandomValues(regexToTest, 100);
+            Assertions.assertTrue(
+                    Pattern.matches(regexToTest, generatedString),
+                    String.format("Unable generate a string matching the supplied regex.\nRegex : %s\nGenerated " +
+                            "string : <%s>", regexToTest, generatedString)
+            );
+        }
+    }
+
+    @Test
+    void testProbeRegexField() {
+        List<String> dataValuesToProbe = Arrays.asList("192.168.1.1", "1.1.1.1");
+        for (String dataValueToProbe : dataValuesToProbe) {
+            System.out.println(Arrays.toString(RegexUtility.probeRegexField(dataValueToProbe).toArray()));
+        }
+    }
+
 
 }
