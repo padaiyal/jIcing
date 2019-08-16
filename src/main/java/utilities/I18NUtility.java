@@ -5,14 +5,15 @@ import java.util.stream.Collectors;
 
 public class I18NUtility {
 
-    private static String language = "en";// TODO: Add to PropertyUtility
-    private static String region = "US";// TODO: Add to PropertyUtility
+    private static String language = PropertyUtility.getProperty("common.language");
+    private static String region = PropertyUtility.getProperty("common.region");
     private static Locale locale = new Locale(language, region);
     private static Set<String> resourceBundleNames = Collections.synchronizedSet(new HashSet<>());
     private static Set<ResourceBundle> resourceBundles = Collections.synchronizedSet(new HashSet<>());
 
     static {
-        resourceBundleNames.add("I18N_Resource_Bundle");
+        String defaultResourceBundleName = PropertyUtility.getProperty("utilities.I18NUtility.resourcebundle.default");
+        resourceBundleNames.add(defaultResourceBundleName);
         buildResourceBundlesSet();
     }
 
