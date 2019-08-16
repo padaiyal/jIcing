@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 public class I18NUtility {
 
-    private static String language = "en";// TODO: Add to SettingUtility
-    private static String region = "US";// TODO: Add to SettingUtility
+    private static String language = "en";// TODO: Add to PropertyUtility
+    private static String region = "US";// TODO: Add to PropertyUtility
     private static Locale locale = new Locale(language, region);
     private static Set<String> resourceBundleNames = Collections.synchronizedSet(new HashSet<>());
     private static Set<ResourceBundle> resourceBundles = Collections.synchronizedSet(new HashSet<>());
@@ -68,7 +68,13 @@ public class I18NUtility {
      */
     public synchronized static void addResourceBundle(String resourceBundleName) {
         resourceBundleNames.add(resourceBundleName);
-        buildResourceBundlesSet();
+        try {
+            buildResourceBundlesSet();
+        }
+        catch (MissingResourceException e) {
+            resourceBundleNames.remove(resourceBundleName);
+            throw e;
+        }
     }
 
     /**
