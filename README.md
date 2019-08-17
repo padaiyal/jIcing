@@ -50,9 +50,27 @@ ZIP, ZIPX, RAR, TAR, 7Z, JAR, ISO, XZ, GZ, BZ2
 * Set folder/file permissions whose name matches the regex (recursive/non-recursive)
 * Set folder/file attributes whose name matches the regex (recursive/non-recursive)
 
+## I18NUtility
+* Retrieve the message corresponding to the key.
+* Add/Remove resource bundles.
+
+## PropertyUtility
+* Retrieve the value corresponding to the property name.
+* Add/Remove property files.
+
 ## Regex Utility<br>
 * Find first N matches of a<regex in a given string
 * Get regex for commonly used literals (Eg: IP Address, Email Address etc)
 * Try to identify type of literal*
+
+## Shell Utility<br>
+* Execute commands in with the following configuration parameters:
+    * Shell/Terminal context.
+    * Execution timeout.
+* Intelligent shell/terminal context identification based on OS.
+
+## Stream Utility
+* Ability to extract string from a given InputStream.
+
 
 *Yet to be completed
