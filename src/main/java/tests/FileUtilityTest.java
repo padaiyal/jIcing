@@ -3,6 +3,8 @@ package tests;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utilities.FileUtility;
+import utilities.PropertyUtility;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.PosixFilePermission;
@@ -15,7 +17,7 @@ public class FileUtilityTest {
     final Path testBedPath;
 
     public FileUtilityTest() {
-        testBedPath = TestResources.TMP_PATH.resolve("FUT");
+        testBedPath = Paths.get(PropertyUtility.getProperty("common.dir.temp")).resolve("FUT");
     }
 
     public void createTestBed() {
@@ -77,7 +79,7 @@ public class FileUtilityTest {
                             }
                     );
             // Generate a list of folder names starting with "folder"
-            List<String> folderPaths = Files.list(TestResources.TMP_PATH)
+            List<String> folderPaths = Files.list(Paths.get(PropertyUtility.getProperty("common.dir.temp")))
                     .parallel()
                     .filter(folderPath -> folderPath.getFileName().toString().startsWith(baseName))
                     .map(folderPath -> folderPath.getFileName().toString())
@@ -93,19 +95,20 @@ public class FileUtilityTest {
 
     @Test
     public void testDeleteRecursively() {
+        boolean folderDeleted = false;
         try {
             createTestBed();
             Path path = testBedPath.resolve("folder1");
             Files.createDirectory(path.resolve("child_folder"));
             FileUtility.deleteRecursively(path);
-            Assertions.assertFalse(Files.exists(path));
-
-        } catch (IOException e) {
+            folderDeleted = !Files.exists(path);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         finally {
             clearTestBed();
         }
+        Assertions.assertTrue(folderDeleted);
     }
 
     @Test
@@ -214,7 +217,6 @@ public class FileUtilityTest {
         Path filePath = folderPath.resolve("1.txt");
         boolean actualResult = Boolean.FALSE;
         try {
-            Files.createDirectory(folderPath);
             Set<PosixFilePermission> permissions = new HashSet<>();
             permissions.add(PosixFilePermission.OWNER_READ);
             FileUtility.setPermissions(folderPath, permissions, false);
@@ -224,6 +226,11 @@ public class FileUtilityTest {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            Set<PosixFilePermission> permissions = new HashSet<>();
+            permissions.add(PosixFilePermission.OWNER_READ);
+            permissions.add(PosixFilePermission.OWNER_WRITE);
+            FileUtility.setPermissions(folderPath, permissions, false);
+
             FileUtility.deleteRecursively(folderPath);
             Assertions.assertTrue(actualResult,
                     "Able to create "
