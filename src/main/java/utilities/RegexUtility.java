@@ -24,28 +24,28 @@ import java.util.stream.IntStream;
 public class RegexUtility {
 
     public enum RegexField {
-        DOMAIN_NAME("(?=.{1,255})^([A-Za-z0-9][A-Za-z0-9-]{0,62})(?:\\.([A-Za-z0-9][A-Za-z0-9-]{0,62}))*$"),
-        IPV4_ADDRESS("(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"),
-        IPV4_SUBNET_MASK("(?:(?:(255)\\.(?:((255)\\.(?:((255)\\.(254|252|248|240|224|192|128|0))|(?:(254|252|248|240|224|192|128)\\.(0))))|(?:(254|252|248|240|224|192|128)\\.(0)\\.(0))))|(?:(254|252|248|240|224|192|128)\\.(0)\\.(0)\\.(0)))"),
-        IPV6_ADDRESS(""),
-        IPV6_SUBNET_MASK(""),
-        PHONE_NUMBER(""),
-        EMAIL_ADDRESS(""),
-        WHOLE_NUMBER("\\d+"),
-        NATURAL_NUMBER("[1-9]\\d*"),
-        INTEGER("([\\-\\+]?)(\\d+)"),
-        DECIMAL("([\\-\\+]?)\\(d+)\\.\\(d+)"),
-        TIMESTAMP("(\\d{4})-((?:0[1-9])|(?:1\\d)|(?:2[0-3]))-((?:0[1-9])|(?:[12]\\d)|(?:3[01]))\\s+((?:0[1-9])|(?:[1][0-9])|(?:2[0-4])):(\\d{2}):(\\d{2})(?:.(\\d{3}))?"),
-        DATE(""),
-        USA_SOCIAL_SECURITY_NUMBER("(?:\\d{3}-\\d{2}-\\d{4})|(?:\\d{9})"),
-        USA_ZIP_CODE("(\\d{5})(?:-(\\d{4}))"),
-        URL(""),
-        LIKE_JSON(""),
-        XML(""),
-        INDIAN_PAN_CARD_NUMBER(""),
-        INDIAN_PASSPORT_NUMBER(""),
-        INDIAN_LICENSE_PLATE(""),
-        USA_LICENSE_PLATE("");
+        DATE("regex.date"),
+        DECIMAL("regex.number.decimal"),
+        DOMAIN_NAME("regex.domain.name"),
+        EMAIL_ADDRESS("regex.email.address"),
+        INDIAN_PAN_CARD_NUMBER("regex.in.pan"),
+        INDIAN_PASSPORT_NUMBER("regex.in.passport"),
+        INDIAN_LICENSE_PLATE("regex.in.auto.license"),
+        INTEGER("regex.number.integer"),
+        IPV4_ADDRESS("regex.ip.v4.address"),
+        IPV4_SUBNET_MASK("regex.ip.v4.subnet"),
+        IPV6_ADDRESS("regex.ip.v6.address"),
+        IPV6_SUBNET_MASK("regex.ip.v6.subnet"),
+        LIKE_JSON("regex.json"),
+        NATURAL_NUMBER("regex.number.natural"),
+        TIMESTAMP("regex.timestamp"),
+        URL("regex.domain.url"),
+        US_LICENSE_PLATE("regex.us.auto.license"),
+        US_PHONE_NUMBER("regex.us.phone.mobile"),
+        US_SOCIAL_SECURITY_NUMBER("regex.us.ssn"),
+        US_ZIP_CODE("regex.us.zipcode"),
+        WHOLE_NUMBER("regex.number.whole"),
+        XML("regex.xml");
 
         private String regex;
         RegexField(String regex) {
@@ -113,7 +113,7 @@ public class RegexUtility {
         Matcher matcher = patternObj.matcher(input);
         List<List<String>> matches = new ArrayList<>();
         // If no matches are to be found. Not to be used.
-        if (N <= 0 || matcher.matches())
+        if (N <= 0 || !matcher.matches())
             return matches;
         int i = 0;
         while (matcher.find()) {
@@ -205,7 +205,7 @@ public class RegexUtility {
         TODO: Character sets
             - Add support for ranges Eg: a-z, 1-9
             - Add support for special characters Eg: $, & etc
-         */
+        */
 
         // Ensure that the input regex is valid
         if(!isValidRegex(regex)) {
