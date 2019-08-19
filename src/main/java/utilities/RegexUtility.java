@@ -1,6 +1,5 @@
 package utilities;
 
-import java.nio.charset.MalformedInputException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,6 +7,8 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 /**
  * @version 1.0.0
  * @author Ranjan Mohan
@@ -22,6 +23,8 @@ import java.util.stream.IntStream;
  *            from a supplied regex
  */
 public class RegexUtility {
+
+    private static Logger logger = LogManager.getLogger(RegexUtility.class);
 
     public enum RegexField {
         DATE("regex.date"),
@@ -157,17 +160,21 @@ public class RegexUtility {
      * @return List of matching field names.
      */
     public static List<RegexField> probeRegexField(String data) {
-        return Arrays.stream(RegexField.values())
+        List<RegexField> regexFields = Arrays.stream(RegexField.values())
                 .parallel()
-                .filter(regexField -> {
-                    boolean result = RegexUtility.matches(regexField.getRegex(), 0, data);
-                    System.out.println(regexField + " - <" + regexField.getRegex() + "> - " + result);
-                    return result;
-                })
+                .filter(regexField -> RegexUtility.matches(regexField.getRegex(), 0, data))
                 .collect(Collectors.toList());
+        logger.debug(
+                String.format(
+                        "Data %s may be one of the following fields - %s",
+                        data,
+                        Arrays.toString(regexFields.toArray())
+                )
+        );
+        return regexFields;
     }
 
-    private static String generateRandomCharacters(int length, String characterSet) {
+    private static String generateString(int length, String characterSet) {
         StringBuilder buffer = new StringBuilder();
         IntStream.range(0, length)
                 .forEach(i -> buffer.append(
@@ -175,6 +182,13 @@ public class RegexUtility {
                                 .charAt(randomObj.nextInt(characterSet.length()))
                         )
                 );
+        logger.debug(
+                String.format("Generated string (%s) of length %d from character set [%s]",
+                    buffer.toString(),
+                    length,
+                    characterSet
+                )
+        );
         return buffer.toString();
     }
 
@@ -184,8 +198,9 @@ public class RegexUtility {
             Pattern.compile(regex);
             result = true;
         }
-        catch (PatternSyntaxException e) {
+        catch (PatternSyntaxException e) {List<List<String>> matches = new ArrayList<>();
             result = false;
+            logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "Invalid", regex));
         }
         return result;
     }
@@ -215,54 +230,81 @@ public class RegexUtility {
         //[]*
         regexCharacterSets = getAllMatches("\\[(.+)\\]\\*", 0, result)
                 .stream()
-                .map(matchList -> matchList.get(0))
+                .map(matchList -> matchList.get(1))
                 .distinct()
                 .collect(Collectors.toList());
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "[]*", regexCharacterSets.size()));
         for (String regexCharacterSet : regexCharacterSets) {
-            result = result.replaceAll(String.format("[%s]*", regexCharacterSet),
-                    fillRandomValues(regexCharacterSet, randomObj.nextInt(randomValueLength + 1)));
+            result = result.replaceAll(
+                    String.format("\\[%s\\]\\*", regexCharacterSet),
+                    generateString(randomObj.nextInt(randomValueLength + 1), regexCharacterSet)
+            );
         }
 
         //[]+
-        regexCharacterSets = getAllMatches("\\[(.+)\\]\\+", -1, result)
+        regexCharacterSets = getAllMatches("\\[(.+)\\]\\+", 0, result)
                 .stream()
-                .map(matchList -> matchList.get(0))
+                .map(matchList -> matchList.get(1))
                 .distinct()
                 .collect(Collectors.toList());
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "[]+", regexCharacterSets.size()));
         for (String regexCharacterSet : regexCharacterSets) {
-            result = result.replaceAll(String.format("[%s]+", regexCharacterSet),
-                    fillRandomValues(regexCharacterSet, randomValueLength));
+            result = result.replaceAll(
+                    String.format("\\[%s\\]\\+", regexCharacterSet),
+                    generateString(randomObj.nextInt(randomValueLength + 1), regexCharacterSet)
+            );
         }
 
         //[]
-        regexCharacterSets = getAllMatches("\\[(.*)\\]", -1, result)
+        regexCharacterSets = getAllMatches("\\[(.*)\\]", 0, result)
                 .stream()
-                .map(matchList -> matchList.get(0))
+                .map(matchList -> matchList.get(1))
                 .distinct()
                 .collect(Collectors.toList());
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "[]", regexCharacterSets.size()));
         for (String regexCharacterSet : regexCharacterSets) {
-            result = result.replaceAll(String.format("[%s]", regexCharacterSet),
-                    fillRandomValues(regexCharacterSet, 1));
+            result = result.replaceAll(
+                    String.format("\\[%s\\]", regexCharacterSet),
+                    generateString(1, regexCharacterSet)
+            );
         }
 
-        result = result.replaceAll("\\.\\*", generateRandomCharacters(randomObj.nextInt(randomValueLength + 1), dotCharacters));
-        result = result.replaceAll("\\.\\+", generateRandomCharacters(randomValueLength, dotCharacters));
-        result = result.replaceAll("\\.", generateRandomCharacters(1, dotCharacters));
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), ".*", RegexUtility.getAllMatches("\\.\\*", 0, result).size()));
+        result = result.replaceAll("\\.\\*", generateString(randomObj.nextInt(randomValueLength + 1), dotCharacters));
 
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), ".+", RegexUtility.getAllMatches("\\.\\+", 0, result).size()));
+        result = result.replaceAll("\\.\\+", generateString(randomValueLength, dotCharacters));
 
-        result = result.replaceAll("\\\\w\\*", generateRandomCharacters(randomObj.nextInt(randomValueLength + 1), wCharacters));
-        result = result.replaceAll("\\\\w\\+", generateRandomCharacters(randomValueLength, wCharacters));
-        result = result.replaceAll("\\\\w", generateRandomCharacters(1, wCharacters));
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), ".", RegexUtility.getAllMatches("\\.", 0, result).size()));
+        result = result.replaceAll("\\.", generateString(1, dotCharacters));
 
-        result = result.replaceAll("\\\\d\\*", generateRandomCharacters(randomObj.nextInt(randomValueLength + 1), dCharacters));
-        result = result.replaceAll("\\\\d\\+", generateRandomCharacters(randomValueLength, dCharacters));
-        result = result.replaceAll("\\\\d", generateRandomCharacters(1, dCharacters));
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\w*", RegexUtility.getAllMatches("\\\\w\\*", 0, result).size()));
+        result = result.replaceAll("\\\\w\\*", generateString(randomObj.nextInt(randomValueLength + 1), wCharacters));
 
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\w+", RegexUtility.getAllMatches("\\\\w\\+", 0, result).size()));
+        result = result.replaceAll("\\\\w\\+", generateString(randomValueLength, wCharacters));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\w", RegexUtility.getAllMatches("\\\\w", 0, result).size()));
+        result = result.replaceAll("\\\\w", generateString(1, wCharacters));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\d*", RegexUtility.getAllMatches("\\\\d\\*", 0, result).size()));
+        result = result.replaceAll("\\\\d\\*", generateString(randomObj.nextInt(randomValueLength + 1), dCharacters));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\d+", RegexUtility.getAllMatches("\\\\d\\+", 0, result).size()));
+        result = result.replaceAll("\\\\d\\+", generateString(randomValueLength, dCharacters));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\d", RegexUtility.getAllMatches("\\\\d", 0, result).size()));
+        result = result.replaceAll("\\\\d", generateString(1, dCharacters));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\s*", RegexUtility.getAllMatches("\\\\s\\*", 0, result).size()));
         result = result.replaceAll("\\\\s\\*", String.join("", Collections.nCopies(randomObj.nextInt(randomValueLength + 1), " ")));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\s+", RegexUtility.getAllMatches("\\\\s\\+", 0, result).size()));
         result = result.replaceAll("\\\\s\\+", String.join("", Collections.nCopies(randomValueLength, " ")));
+
+        logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "\\s", RegexUtility.getAllMatches("\\\\s", 0, result).size()));
         result = result.replaceAll("\\\\s", " ");
 
         return result;
     }
-
 }
