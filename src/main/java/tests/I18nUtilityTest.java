@@ -4,20 +4,57 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utilities.I18NUtility;
 
+import java.util.IllegalFormatConversionException;
 import java.util.MissingResourceException;
 
 class I18nUtilityTest {
 
     @Test
-    void testGetStringWithValidKey() {
+    void testGetNonFormattedStringWithValidKey() {
         Assertions.assertEquals("Hello All!!!", I18NUtility.getString("com.sample.message"));
+    }
+
+    @Test
+    void testGetFormattedStringWithValidKeyAndValidValues() {
+        Assertions.assertEquals("Hello value1!!!", I18NUtility.getFormattedString("com.sample.formattedmessage", "value1"));
+    }
+
+    @Test
+    void testGetFormattedStringWithValidKeyAndInvalidValues() {
+        boolean illegalFormatConversionExceptionThrown = false;
+        try {
+            I18NUtility.getFormattedString("com.sample.formattedmessage1", "value1");
+        }
+        catch(IllegalFormatConversionException e) {
+            illegalFormatConversionExceptionThrown = true;
+        }
+        Assertions.assertTrue(illegalFormatConversionExceptionThrown);
+    }
+
+    @Test
+    void testGetNonFormattedStringWithValidKeyAndValues() {
+        Assertions.assertEquals("Hello All!!!", I18NUtility.getFormattedString("com.sample.message", "value1"));
     }
 
     @Test
     void testGetStringWithInvalidKey() {
         boolean missingResourceExceptionThrown = false;
         try {
-            I18NUtility.getString("com.sample.message.invalid");
+            I18NUtility .getString("com.sample.message.invalid");
+        }
+        catch(MissingResourceException e) {
+            missingResourceExceptionThrown = true;
+        }
+        finally {
+            Assertions.assertTrue(missingResourceExceptionThrown);
+        }
+    }
+
+    @Test
+    void testGetStringWithInvalidKeyAndValues() {
+        boolean missingResourceExceptionThrown = false;
+        try {
+            Assertions.assertEquals("Hello value1!!!", I18NUtility.getFormattedString("com.sample.formattedmessageinvalid", "value1"));
         }
         catch(MissingResourceException e) {
             missingResourceExceptionThrown = true;

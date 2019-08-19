@@ -1,5 +1,7 @@
 package tests;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utilities.FileUtility;
@@ -14,6 +16,7 @@ import java.util.stream.IntStream;
 
 public class FileUtilityTest {
 
+    private Logger logger = LogManager.getLogger(FileUtilityTest.class);
     final Path testBedPath;
 
     public FileUtilityTest() {
@@ -24,7 +27,7 @@ public class FileUtilityTest {
         try {
             Files.createDirectory(testBedPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         // Create 2 folders with a txt file in each with the same name of the folder - folders1 to folders2
         // Create 2 folders with a txt file in each with the same name of the folder - folder1 to folder2
@@ -37,7 +40,7 @@ public class FileUtilityTest {
                                         Files.createDirectory(testBedPath.resolve(baseName+i));
                                         Files.createFile(testBedPath.resolve(baseName+i).resolve(baseName+i+".txt"));
                                     } catch (IOException e) {
-                                        e.printStackTrace();
+                                        logger.error(e);
                                     }
                                 })
                 );
@@ -49,7 +52,7 @@ public class FileUtilityTest {
                         Files.createDirectory(testBedPath.resolve("fold"+i));
                         Files.createFile(testBedPath.resolve("fold"+i).resolve("fold"+i+".txt"));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e);
                     }
                 });
     }
@@ -59,7 +62,7 @@ public class FileUtilityTest {
             Runtime.getRuntime()
                     .exec(String.format("rm -rf %s", testBedPath.toString()));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -86,7 +89,7 @@ public class FileUtilityTest {
                     .collect(Collectors.toList());
             Assertions.assertEquals(0, folderPaths.size());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         finally {
             clearTestBed();
@@ -103,7 +106,7 @@ public class FileUtilityTest {
             FileUtility.deleteRecursively(path);
             folderDeleted = !Files.exists(path);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         finally {
             clearTestBed();
@@ -147,7 +150,7 @@ public class FileUtilityTest {
             }
         }
         catch(Exception e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         finally {
             // Cleanup files
@@ -224,7 +227,7 @@ public class FileUtilityTest {
         } catch (AccessDeniedException e) {
             actualResult = Boolean.TRUE;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         } finally {
             Set<PosixFilePermission> permissions = new HashSet<>();
             permissions.add(PosixFilePermission.OWNER_READ);

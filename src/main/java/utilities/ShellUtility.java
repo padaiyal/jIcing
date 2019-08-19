@@ -1,5 +1,8 @@
 package utilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 
 public class ShellUtility {
 
+    private static Logger logger = LogManager.getLogger(ShellUtility.class);
     private static OS os = OS.getOs();
     private static HashMap<TypeOfShell, Path> shells = new HashMap<>();
 
@@ -57,7 +61,7 @@ public class ShellUtility {
                     shells.put(typeOfShell, Paths.get(response.getOutput(TypeOfOutput.STDOUT).trim()));
                 }
             } catch (IOException | InterruptedException | OsNotFoundException | TimeoutException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
@@ -82,8 +86,8 @@ public class ShellUtility {
         }
 
         public String toString() {
-            return String.format(
-                    I18NUtility.getString("exception.ShellNotFoundException"),
+            return I18NUtility.getFormattedString(
+                    "exception.ShellNotFoundException",
                     typeOfShell
             );
         }
@@ -99,8 +103,8 @@ public class ShellUtility {
         }
 
         public String toString() {
-            return String.format(
-                    I18NUtility.getString("exception.OsNotFoundException"),
+            return I18NUtility.getFormattedString(
+                    "exception.OsNotFoundException",
                     os
             );
         }
@@ -196,20 +200,20 @@ public class ShellUtility {
      */
     public static synchronized Response executeCommand(String command, Duration timeOutDuration) throws IOException, InterruptedException, TimeoutException {
         Objects.requireNonNull(command,
-                String.format(
-                        I18NUtility.getString("input.validation.nonnull"),
+                I18NUtility.getFormattedString(
+                        "input.validation.nonnull",
                         "Command"
                 )
         );
         Objects.requireNonNull(timeOutDuration,
-                String.format(
-                        I18NUtility.getString("input.validation.nonnull"),
+                I18NUtility.getFormattedString(
+                        "input.validation.nonnull",
                         "Duration"
                 )
         );
         System.out.println(
-                String.format(
-                        I18NUtility.getString("utilities.ShellUtility.executing"),
+                I18NUtility.getFormattedString(
+                        "utilities.ShellUtility.executing",
                         command
                 )
         );
@@ -224,8 +228,7 @@ public class ShellUtility {
         if (timedOut) {
             executionDuration = Duration.between(executionStartTimestamp, ZonedDateTime.now()).getSeconds();
             throw new TimeoutException(
-                    String.format(
-                            I18NUtility.getString("exception.TimeoutException"),
+                    I18NUtility.getFormattedString("exception.TimeoutException",
                             command,
                             executionDuration,
                             timeOutDuration.getSeconds()
@@ -266,20 +269,20 @@ public class ShellUtility {
      */
     public static Response executeCommand(Command command, TypeOfShell typeOfShell, Duration timeOutDuration) throws IOException, InterruptedException, ShellNotFoundException, TimeoutException {
         Objects.requireNonNull(command,
-                String.format(
-                        I18NUtility.getString("input.validation.nonnull"),
+                I18NUtility.getFormattedString(
+                        "input.validation.nonnull",
                         "Command"
                 )
         );
         Objects.requireNonNull(typeOfShell,
-                String.format(
-                        I18NUtility.getString("input.validation.nonnull"),
+                I18NUtility.getFormattedString(
+                        "input.validation.nonnull",
                         "TypeOfShell"
                 )
         );
         Objects.requireNonNull(timeOutDuration,
-                String.format(
-                        I18NUtility.getString("input.validation.nonnull"),
+                I18NUtility.getFormattedString(
+                        "input.validation.nonnull",
                         "Duration"
                 )
         );

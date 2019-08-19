@@ -1,5 +1,8 @@
 package utilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +12,7 @@ import java.util.stream.Collectors;
 
 public class PropertyUtility {
 
+    private static Logger logger = LogManager.getLogger(PropertyUtility.class);
     private static Set<String> propertyFileNames = Collections.synchronizedSet(new HashSet<>());
     private static Set<Properties> propertyFiles = Collections.synchronizedSet(new HashSet<>());
 
@@ -29,7 +33,7 @@ public class PropertyUtility {
                             try {
                                 propertyFile.load(Files.newInputStream(Paths.get(String.valueOf(propertyFileName))));
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.error(e);
                             }
                             return propertyFile;
                         })
