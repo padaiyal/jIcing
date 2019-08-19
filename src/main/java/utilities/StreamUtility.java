@@ -1,5 +1,8 @@
 package utilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +17,8 @@ import java.io.InputStreamReader;
  */
 public class StreamUtility {
 
+    private static Logger logger = LogManager.getLogger(StreamUtility.class);
+
     /**
      * Extracts the information from a given InputStream as a string.
      * @param inputStream The InputStream to parse.
@@ -26,8 +31,9 @@ public class StreamUtility {
                 result = bufferedReader.lines()
                         .reduce("", (x,y) -> x + "\n" + y)
                         .trim();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (IOException e) {
+            logger.error(e);
         }
         return result;
     }

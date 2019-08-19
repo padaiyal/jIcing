@@ -1,5 +1,8 @@
 package utilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -15,6 +18,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class FileUtility {
+
+    private static Logger logger = LogManager.getLogger(FileUtility.class);
 
     /**
      * Creates a specific number of folders with the specified name and prefix/suffix
@@ -33,7 +38,7 @@ public class FileUtility {
                             try {
                                 Files.createDirectories(folderPath);
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.error(e);
                             }
                         }
                 );
@@ -59,13 +64,13 @@ public class FileUtility {
                             try {
                                 Files.setPosixFilePermissions(node, permissions);
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.error(e);
                             }
                         });
             else
                 Files.setPosixFilePermissions(path, permissions);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -107,7 +112,7 @@ public class FileUtility {
         try {
             contents = searchTree ? Files.walk(path) : Files.list(path);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         if (Files.isDirectory(path)) {
             matchList.addAll(
@@ -147,7 +152,7 @@ public class FileUtility {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -205,7 +210,7 @@ public class FileUtility {
                     try {
                         Files.setAttribute(content, attribute.name(), attribute.value());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e);
                     }
                 });
     }
