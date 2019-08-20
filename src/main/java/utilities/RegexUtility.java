@@ -115,8 +115,8 @@ public class RegexUtility {
         Pattern patternObj = Pattern.compile(patternString, patternOptions);
         Matcher matcher = patternObj.matcher(input);
         List<List<String>> matches = new ArrayList<>();
-        // If no matches are to be found. Not to be used.
-        if (N <= 0 || !matcher.matches())
+        // If no matches are to be found. return empty list.
+        if (N == 0)
             return matches;
         int i = 0;
         while (matcher.find()) {
@@ -140,7 +140,7 @@ public class RegexUtility {
      * @return List of matches where each match is a list of groups.
      */
     public static List<List<String>> getAllMatches(String patternString, int patternOptions, String input) throws InvalidRegexException {
-        return getFirstNMatches(patternString, patternOptions, input.length(), input);
+        return getFirstNMatches(patternString, patternOptions, -1, input);
     }
 
 //    /**
