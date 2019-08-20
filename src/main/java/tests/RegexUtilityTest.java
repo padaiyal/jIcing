@@ -78,7 +78,9 @@ class RegexUtilityTest {
             "\\d",
             "\\d+",
             "\\d*",
-            "[abz]*"
+            "[abz]",
+            "[abz]*",
+            "[abz]+"
         );
         for(String regexToTest:regexsToTest) {
             String generatedString = RegexUtility.fillRandomValues(regexToTest, 100);
