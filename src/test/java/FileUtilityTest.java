@@ -1,5 +1,3 @@
-package tests;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
@@ -214,14 +212,14 @@ class FileUtilityTest {
     }
 
     @Test
-    public void testSetPermissions() {
+    public void testSetPermissions() throws IOException {
         createTestBed();
         Path folderPath = testBedPath.resolve("folder1");
         Path filePath = folderPath.resolve("1.txt");
         boolean actualResult = Boolean.FALSE;
         try {
-            Set<PosixFilePermission> permissions = new HashSet<>();
-            permissions.add(PosixFilePermission.OWNER_READ);
+            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
+            permissions.remove(PosixFilePermission.OWNER_WRITE);
             FileUtility.setPermissions(folderPath, permissions, false);
             Files.createFile(filePath);
         } catch (AccessDeniedException e) {
@@ -229,8 +227,7 @@ class FileUtilityTest {
         } catch (IOException e) {
             logger.error(e);
         } finally {
-            Set<PosixFilePermission> permissions = new HashSet<>();
-            permissions.add(PosixFilePermission.OWNER_READ);
+            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
             permissions.add(PosixFilePermission.OWNER_WRITE);
             FileUtility.setPermissions(folderPath, permissions, false);
 
