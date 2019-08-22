@@ -1,5 +1,3 @@
-package tests;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +31,7 @@ class ShellUtilityTest {
         timeoutDuration = Duration.ofSeconds(5);
 
         OS os = OS.getOs();
-
+        
         switch(os) {
             case WINDOWS:
                 typeOfShell = ShellUtility.TypeOfShell.CMD;
@@ -47,7 +45,8 @@ class ShellUtilityTest {
     }
 
     @Test
-    void testExecuteCommandString() throws IOException, InterruptedException, TimeoutException, ShellUtility.ShellNotFoundException {
+    public void testExecuteCommandString() throws IOException, InterruptedException, TimeoutException, ShellUtility.ShellNotFoundException {
+        System.out.println("SHELL - " + typeOfShell);
         String commandString = command.getCommand(typeOfShell);
         Response response = ShellUtility.executeCommand(commandString);
         Assertions.assertEquals(0, response.getReturnCode());

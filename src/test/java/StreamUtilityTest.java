@@ -1,5 +1,3 @@
-package tests;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utilities.StreamUtility;
@@ -8,7 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 
-public class StreamUtilityTest {
+class StreamUtilityTest {
 
     @Test
     public void testConvertInputStreamToString() {
