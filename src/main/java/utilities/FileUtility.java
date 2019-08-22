@@ -57,7 +57,7 @@ public class FileUtility {
      */
     public static void setPermissions(Path path, Set<PosixFilePermission> permissions, boolean setRecursively) {
         try {
-            if (setRecursively)
+            if (setRecursively) {
                 Files.walk(path)
                         .parallel()
                         .forEach(node -> {
@@ -67,6 +67,7 @@ public class FileUtility {
                                 logger.error(e);
                             }
                         });
+            }
             else
                 Files.setPosixFilePermissions(path, permissions);
         } catch (IOException e) {
