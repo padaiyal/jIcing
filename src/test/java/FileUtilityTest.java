@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FileUtilityTest {
+class FileUtilityTest {
 
     private Logger logger = LogManager.getLogger(FileUtilityTest.class);
     final Path testBedPath;
