@@ -5,15 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class Tree<T extends Comparable<T>> {
 	T value;
 	Tree<T>[] children;
 	int children_count,current_index;
 	boolean tree_changed;
-	TypeIndpependentOperations<T> TIO;
+	TypeIndependentOperations<T> TIO;
 	int tree_nodes_count;
 	Tree(T value, int children_count) {
 		this.value = value;
@@ -21,7 +19,7 @@ public class Tree<T extends Comparable<T>> {
 		for(int i=0;i<children_count;i++)
 			children[i]=null;
 		current_index = 0;
-		TIO = new TypeIndpependentOperations<T>();
+		TIO = new TypeIndependentOperations<T>();
 		this.children_count = children_count;
 		tree_changed=false;
 		tree_nodes_count=1;
