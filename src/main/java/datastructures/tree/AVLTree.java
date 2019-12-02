@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import misc.Comparison;
-import misc.TypeIndpependentOperations;
+import misc.TypeIndependentOperations;
 public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 
 	List<T> sorted_node_values;
@@ -87,10 +87,10 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 	}*/
 	public int getInsertionIndex(T value) {
 		for(int i=0;i<sorted_node_values.size();i++) {
-			if(TypeIndpependentOperations.compare(sorted_node_values.get(i),value) == Comparison.EQUAL) {
+			if(TypeIndependentOperations.compare(sorted_node_values.get(i),value) == Comparison.EQUAL) {
 				return -1;
 			}
-			if(TypeIndpependentOperations.compare(sorted_node_values.get(i),value) == Comparison.GREATER) {
+			if(TypeIndependentOperations.compare(sorted_node_values.get(i),value) == Comparison.GREATER) {
 				return i;
 			}
 		}
@@ -99,7 +99,7 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 	
 	public int find(T value) {
 		for(int i=0;i<sorted_node_values.size();i++) {
-			if(TypeIndpependentOperations.compare(sorted_node_values.get(i),value) == Comparison.EQUAL) {
+			if(TypeIndependentOperations.compare(sorted_node_values.get(i),value) == Comparison.EQUAL) {
 				return i;
 			}
 		}

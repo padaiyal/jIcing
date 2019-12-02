@@ -7,8 +7,11 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import misc.Comparison;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * @version 1.0.0
  * @author Ranjan Mohan
@@ -198,7 +201,7 @@ public class RegexUtility {
             Pattern.compile(regex);
             result = true;
         }
-        catch (PatternSyntaxException e) {List<List<String>> matches = new ArrayList<>();
+        catch (PatternSyntaxException e) {
             result = false;
             logger.debug(String.format(I18NUtility.getString("utilities.RegexUtility.pattern.count"), "Invalid", regex));
         }
@@ -306,5 +309,72 @@ public class RegexUtility {
         result = result.replaceAll("\\\\s", " ");
 
         return result;
+    }
+
+    /**
+     * Eg: For identifying numbers < 1125
+     *
+     * Regular Regex
+     * < 1125 maps to
+     * 1[0-0]\d\d
+     * OR 11[0-1]\d
+     * OR 112[0-4]
+     * OR ^\d$
+     * OR ^\d\d$
+     * OR ^\d\d\d$
+     *
+     * SQL Regex
+     * < 1125 maps to
+     * 1[0-0][0-9][0-9]
+     * OR 11[0-1][0-9]
+     * OR 112[0-4]
+     * OR ^[0-9]$
+     * OR ^[0-9][0-9]$
+     * OR ^[0-9][0-9][0-9]$
+     *
+     * @param number The number to generate a regex based on.
+     * @param sqlRegex If true, we generate a regex that can be used with SQL queries, else it generates a normal regex
+     * @return The generated regexps, out of which even if one of them match a value, it is lesser than the specified
+     * number.
+     */
+    public static String[] generateRegexpsForPositiveNumbersLesserThan(int number, Comparison comparison, boolean sqlRegex) {
+
+        if(number < 0 || comparison == Comparison.GREATER || comparison == Comparison.GREATER_THAN_EQUAL) {
+            throw new NotImplementedException();
+        }
+
+        String valueString = Integer.toString(number);
+        int[] digits = valueString.chars().map(c -> c-'0').toArray();
+        List<String> regexps = new ArrayList<>();
+
+        String allPossibleDigitValues = sqlRegex?"[0-9]":"\\d";
+
+        if(
+            comparison == Comparison.EQUAL
+            || comparison == Comparison.LESSER_THAN_EQUAL
+        ) {
+            regexps.add(Integer.toString(number));
+        }
+
+        // Generates regexps to match all numbers with the same number of digits, but lesser in value
+        // Generates regex to numbers that are lesser in number of digits
+        if (comparison == Comparison.LESSER || comparison == Comparison.LESSER_THAN_EQUAL) {
+            IntStream.range(1, digits.length - 1)
+                    .filter(digitIndex -> digits[digitIndex] > 0)
+                    .mapToObj(digitIndex -> valueString.substring(0, digitIndex)
+                            + "[0-" + Math.max(digits[digitIndex] - 1, 0) + "]"
+                            + StringUtility.repeat(allPossibleDigitValues,
+                            digits.length - (digitIndex + 1)))
+                    .forEach(regexps::add);
+            if(digits[digits.length - 1] > 0) {
+                regexps.add(valueString.substring(0, valueString.length() - 1)
+                        + "[0-" + Math.max(digits[digits.length - 1] - 1, 0) + "]");
+            }
+            IntStream.range(1, digits.length)
+                    .mapToObj(index -> String.format("^%s$", StringUtility.repeat(allPossibleDigitValues, index)))
+                    .forEach(regexps::add);
+        }
+
+        return regexps.toArray(new String[0]);
     }
 }

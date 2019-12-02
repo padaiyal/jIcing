@@ -1,6 +1,6 @@
 package misc;
 import datastructures.tree.NodeTemplate;
-public class TypeIndpependentOperations<T> {
+public class TypeIndependentOperations<T> {
 	public static <T> Comparison compare(T value1,T value2) {
 		if(value1.getClass().equals(Byte.class)
 		 ||value1.getClass().equals(Short.class)
@@ -25,7 +25,7 @@ public class TypeIndpependentOperations<T> {
 		else if(value1 instanceof NodeTemplate && value2 instanceof NodeTemplate)
 			return ((NodeTemplate)value1).compare((NodeTemplate)value1,(NodeTemplate)value2);
 		else
-			return Comparison.NA;
+			throw new UnsupportedOperationException();
 	}
 }
 

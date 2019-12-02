@@ -16,14 +16,14 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 		if(value.equals(child_value))
 			System.err.println("Value already present in BST");
 		else {
-			if(TypeIndpependentOperations.compare(child_value, value) == Comparison.LESSER) {
+			if(TypeIndependentOperations.compare(child_value, value) == Comparison.LESSER) {
 				if(children[0]==null) {
 					children[0] = new BinarySearchTree<T>(child_value);
 				}
 				else
 					children[0].addChildNode(child_value); //Add to LEFT
 			}
-			else if(TypeIndpependentOperations.compare(child_value, value) == Comparison.GREATER) {
+			else if(TypeIndependentOperations.compare(child_value, value) == Comparison.GREATER) {
 				if(children[1]==null) {
 					children[1] = new BinarySearchTree<T>(child_value);
 				}
@@ -34,7 +34,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 	}
 	public void delete(T node_value) {  
 		
-		if(TypeIndpependentOperations.compare(value,node_value) == Comparison.EQUAL) {
+		if(TypeIndependentOperations.compare(value,node_value) == Comparison.EQUAL) {
 			if(children[0]!=null) {
 				value = children[0].max();
 				if(children[0].children[1]!=null || children[0].children[0]!=null)
