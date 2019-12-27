@@ -52,6 +52,7 @@ ZIP, ZIPX, RAR, TAR, 7Z, JAR, ISO, XZ, GZ, BZ2
 
 ## I18NUtility
 * Retrieve the message corresponding to the key.
+* Retrieve the formatted message corresponding to the key.
 * Add/Remove resource bundles.
 
 ## PropertyUtility
@@ -72,5 +73,7 @@ ZIP, ZIPX, RAR, TAR, 7Z, JAR, ISO, XZ, GZ, BZ2
 ## Stream Utility
 * Ability to extract string from a given InputStream.
 
+## String Utility
+* Repeat a string a specified number of times.
 
 *Yet to be completed
