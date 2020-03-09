@@ -30,5 +30,52 @@ class StringUtilityTest {
             Assertions.assertTrue(repeatCount < 0);
         }
     }
-}
 
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "lollollollollol, lolololol, false",
+            "lolololololool, lool, true",
+            "pololololol121, po, true",
+            "pololololol121, pololololok, false",
+            "pololololol121, ololololol1, true",
+            "lololololol, lololololololololol, false",
+            "mississippi, issip, true",
+            "'', '', true",
+            "abcd, '', true",
+            "'', abcd, false",
+
+        }
+    )
+    void testIsSubString(String baseString, String subString, boolean expectedResult) {
+        boolean actualResult = StringUtility.isSubString(baseString, subString);
+        Assertions.assertEquals(expectedResult, actualResult);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "lol,",
+            ", sub",
+            ","
+        }
+    )
+    void testIsSubStringWithNullInput(String baseString, String subString) {
+        Assertions.assertThrows(NullPointerException.class, () -> StringUtility.isSubString(baseString, subString));
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "LEVENSHTEIN,   HONDA,      HYUNDAI,    3",
+            "LEVENSHTEIN,   KITTEN,     SITTING,    3",
+            "LEVENSHTEIN,   INTENTION,  EXECUTION,  5"
+        }
+    )
+    void testStringSimilarityDistance(StringUtility.StringSimilarityDistanceType stringSimilarityDistanceType, String str1, String str2, Double expectedDistance) {
+        Assertions.assertEquals(
+            expectedDistance,
+            StringUtility.getStringSimilarityDistance(stringSimilarityDistanceType, str1, str2)
+        );
+    }
+}
