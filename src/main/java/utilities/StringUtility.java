@@ -81,52 +81,61 @@ public class StringUtility {
         return result;
     }
 
-    public HashMap<Character, Integer> getCharacterFrequencyDistribution(String str) {
+    public static HashMap<Character, Long> getCharacterFrequencyDistribution(String str) {
         Objects.requireNonNull(str);
 
-        HashMap<Character, Integer> characterFrequencyDistribution = new HashMap<>();
-        IntStream.range(0, str.length())
+        Map<Character, Long> characterFrequencyDistribution = IntStream.range(0, str.length())
             .mapToObj(str::charAt)
-            .forEach(character -> characterFrequencyDistribution.put(
-                    character,
-                    characterFrequencyDistribution.getOrDefault(character, 0) + 1
-                )
+            .collect(
+                    Collectors.groupingBy(
+                            token -> token,
+                            Collectors.counting()
+                    )
             );
-        return characterFrequencyDistribution;
+
+        return new HashMap<>(characterFrequencyDistribution);
     }
 
-    public HashMap<String, Integer> getWordFrequencyDistribution(String str, String[] delimiters) {
+    public static HashMap<String, Long> getWordFrequencyDistribution(String str, String ... delimiters) {
         Objects.requireNonNull(str);
         Objects.requireNonNull(delimiters);
+
         if(delimiters.length == 0) {
             throw new IllegalArgumentException(I18NUtility.getString("utilities.StringUtility.getWordFrequencyDistribution.error.noDelimitersSpecified"));
         }
 
-        HashMap<String, Integer> wordFrequencyDistribution = new HashMap<>();
+        Map<String, Long> wordFrequencyDistribution = new HashMap<>();
         String delimiterRegex;
         if(delimiters.length == 1) {
             delimiterRegex = delimiters[0];
         }
         else {
             delimiterRegex = Arrays.stream(delimiters)
-                    .map(delimiter -> "(" + delimiter + ")")
+                    .map(delimiter -> String.format("(%s)", delimiter))
                     .reduce((d1, d2) -> d1 + "|" + d2)
                     .get();
         }
         String[] words = str.split(delimiterRegex);
-        Arrays.stream(words)
-        .forEach(word -> wordFrequencyDistribution.put(
-                word,
-                wordFrequencyDistribution.getOrDefault(word, 0) + 1
-            )
-        );
 
-        return wordFrequencyDistribution;
+        wordFrequencyDistribution = Arrays.stream(words)
+            .collect(
+                Collectors.groupingBy(
+                        token -> token,
+                        Collectors.counting()
+                )
+            );
+
+
+        return new HashMap<>(wordFrequencyDistribution);
     }
 
     public enum StringSimilarityDistanceType {
         HAMMING,
-        LEVENSHTEIN
+        LEVENSHTEIN,
+        JARO,
+        JARO_WRINKLER,
+        JACCARD_INDEX,
+        SORENSEN_DICE
     }
 
     public static double getStringSimilarityDistance(StringSimilarityDistanceType stringSimilarityDistanceType, String str1, String str2) {
@@ -134,13 +143,25 @@ public class StringUtility {
         Objects.requireNonNull(str1);
         Objects.requireNonNull(str2);
 
-        double distance = 0.0D;
+        double distance;
         switch(stringSimilarityDistanceType) {
             case HAMMING:
                 distance = getHammingDistance(str1, str2);
                 break;
             case LEVENSHTEIN:
                 distance = getLevenshteinDistance(str1, str2);
+                break;
+            case JARO:
+                distance = getJaroDistance(str1, str2);
+                break;
+            case JARO_WRINKLER:
+                distance = getJaroWrinklerDistance(str1, str2, 0.1);
+                break;
+            case JACCARD_INDEX:
+                distance = getJaccardIndexDistance(str1, str2, new String[]{" "});
+                break;
+            case SORENSEN_DICE:
+                distance = getSorensenDiceDistance(str1, str2, new String[]{" "});
                 break;
             default:
                 throw new UnsupportedOperationException(I18NUtility.getString("utilities.StringUtility.getWordFrequencyDistribution.error.getStringSimilarityDistance"));
@@ -171,7 +192,7 @@ public class StringUtility {
      * @param str2  String input
      * @return  The hamming distance between the two input strings
      */
-    private static int getHammingDistance(String str1, String str2) {
+    private static double getHammingDistance(String str1, String str2) {
         int hammingDistance = Math.abs(str1.length() - str2.length());
         hammingDistance += IntStream.range(0, Math.min(str1.length(), str2.length()))
                 .filter(index -> str1.charAt(index) != str2.charAt(index))
@@ -220,19 +241,20 @@ public class StringUtility {
      * @param str2  String input
      * @return  The levenshtein distance between the two input strings
      */
-    private static int getLevenshteinDistance(String str1, String str2) {
+    private static double getLevenshteinDistance(String str1, String str2) {
         int[][] distanceMatrix = new int[str1.length()][str2.length()];
-        int diagonalDistance = 0;
-        int verticalDistance = 0;
-        int horizontalDistance = 0;
+        int diagonalDistance;
+        int verticalDistance;
+        int horizontalDistance;
         for(int i=0; i<str1.length(); i++) {
             for(int j=0; j<str2.length(); j++) {
                 diagonalDistance = verticalDistance = horizontalDistance = Integer.MAX_VALUE;
+                int characterMatchCount = (str1.charAt(i) == str2.charAt(j)) ? 0 : 1;
                 if(i>0 && j>0) {
-                    diagonalDistance = distanceMatrix[i - 1][j - 1] + ((str1.charAt(i) == str2.charAt(j)) ? 0 : 1);
+                    diagonalDistance = distanceMatrix[i - 1][j - 1] + characterMatchCount;
                 }
                 else if (i==0 && j==0){
-                    diagonalDistance = ((str1.charAt(i) == str2.charAt(j)) ? 0 : 1);
+                    diagonalDistance = characterMatchCount;
                 }
                 if(i>0) {
                     verticalDistance = distanceMatrix[i - 1][j] + 1;
@@ -249,43 +271,150 @@ public class StringUtility {
         return distanceMatrix[str1.length() - 1][str2.length() - 1];
     }
 
-    private static int getJaroMatchingCharactersCount(String str1, String str2) {
+    /**
+     * TODO
+     * @param str1
+     * @param str2
+     * @return
+     */
+    private static double getJaroDistance(String str1, String str2) {
+        Objects.requireNonNull(str1);
+        Objects.requireNonNull(str2);
+
         int matchingDistance = Math.max(str1.length(), str2.length())/2 - 1;
-        Set<Integer> indexesMatchedInStr2 = new HashSet<>();
-        boolean matchFound = false;
-        return IntStream.range(0, str1.length())
+        HashMap<Integer, Boolean> indexesMatchedInStr2 = new HashMap<>();
+        int numberOfMatchingCharacters = IntStream.range(0, str1.length())
             //.map(index -> { System.out.println("Index:" + index);return index;})
             .map(
                 index -> IntStream.range(
                     Math.max(0, index - matchingDistance),
                     Math.min(
-                            index + matchingDistance + 1,
-                            Math.min(str1.length(), str2.length())
+                        index + matchingDistance + 1,
+                        Math.min(str1.length(), str2.length())
                     )
                 )
                 .filter(
                     window_index -> {
-                        if(!indexesMatchedInStr2.contains(window_index)
+                        if(!indexesMatchedInStr2.containsKey(window_index)
                                 && str2.charAt(window_index) == str1.charAt(index)) {
-                            indexesMatchedInStr2.add(window_index);
+                            indexesMatchedInStr2.put(
+                                    window_index,
+                                    (window_index < str1.length())
+                                            && (index < str2.length())
+                                            && index != window_index
+                                            && str2.charAt(index) == str1.charAt(window_index)
+                            );
                             return true;
                         }
                         return false;
-
                     }
                 )
                 .findFirst()
                 .isPresent()?1:0
             )
             .sum();
+        int numberOfTranspositions = (int) indexesMatchedInStr2.values()
+                .stream()
+                .filter(doesTransposeMatch -> doesTransposeMatch)
+                .count();
+
+        double jaroSimilarity = 0.0D;
+
+        if(numberOfMatchingCharacters != 0) {
+            jaroSimilarity = (1.0/3.0)
+                * (
+                    (numberOfMatchingCharacters/(double)str1.length())
+                    + (numberOfMatchingCharacters/(double)str2.length())
+                    + (1 - (numberOfTranspositions/2.0)/(double)numberOfMatchingCharacters)
+                );
+        }
+
+        return jaroSimilarity;
     }
 
-    private static int getJaroDistance(String str1, String str2) {
-        int numberOfMatchingCharacters = getJaroMatchingCharactersCount(str1, str2);
+    /**
+     * TODO
+     * @param str1
+     * @param str2
+     * @param scalingFactor
+     * @return
+     */
+    private static double getJaroWrinklerDistance(String str1, String str2, double scalingFactor) {
+        Objects.requireNonNull(str1);
+        Objects.requireNonNull(str2);
+
+        double jaroDistance = getJaroDistance(str1, str2);
+        int longestMatchingPrefixLength = 0;
+        for(int i=0; i<Math.min(str1.length(), str2.length()); i++) {
+            if(str1.charAt(i) == str2.charAt(i)) {
+                longestMatchingPrefixLength++;
+            }
+            else {
+                break;
+            }
+        }
+        return jaroDistance + longestMatchingPrefixLength * scalingFactor * (1 - jaroDistance);
     }
 
-    public static void main(String[] args) {
-        System.out.println(getJaroMatchingCharactersCount("SMELYFISHHH", "JEOTLFISH"));
+    /**
+     * TODO
+     * @param str1Tokens
+     * @param str2Tokens
+     * @return
+     */
+    private static long getCommonTokensCount(HashMap<String, Long> str1Tokens, HashMap<String, Long> str2Tokens) {
+        return str1Tokens.keySet()
+                .stream()
+                .filter(str2Tokens::containsKey)
+                .mapToLong(commonToken -> Math.min(
+                        str1Tokens.get(commonToken),
+                        str2Tokens.get(commonToken)
+                        )
+                )
+                .sum();
     }
 
+    /**
+     * TODO
+     * @param str1
+     * @param str2
+     * @param delimiters
+     * @return
+     */
+    private static double getJaccardIndexDistance(String str1, String str2, String[] delimiters) {
+        Objects.requireNonNull(str1);
+        Objects.requireNonNull(str2);
+        Objects.requireNonNull(delimiters);
+
+        if(delimiters.length < 1) {
+            // TODO
+            throw new IllegalArgumentException("TODO");
+        }
+
+        HashMap<String, Long> str1Tokens =  getWordFrequencyDistribution(str1, delimiters);
+        HashMap<String, Long> str2Tokens =  getWordFrequencyDistribution(str2, delimiters);
+        long commonTokensCount = getCommonTokensCount(str1Tokens, str2Tokens);
+
+        Set<String> totalUniqueTokens = new HashSet<>(str1Tokens.keySet());
+        totalUniqueTokens.addAll(str2Tokens.keySet());
+        int totalUniqueTokensCount = totalUniqueTokens.size();
+
+        return commonTokensCount / (double) totalUniqueTokensCount;
+    }
+
+    public static double getSorensenDiceDistance(String str1, String str2, String[] delimiters) {
+        Objects.requireNonNull(str1);
+        Objects.requireNonNull(str2);
+        Objects.requireNonNull(delimiters);
+
+        if(delimiters.length < 1) {
+            // TODO
+            throw new IllegalArgumentException("TODO");
+        }
+
+        HashMap<String, Long> str1Tokens =  getWordFrequencyDistribution(str1, delimiters);
+        HashMap<String, Long> str2Tokens =  getWordFrequencyDistribution(str2, delimiters);
+        long commonTokensCount = getCommonTokensCount(str1Tokens, str2Tokens);
+        return 2.0 * commonTokensCount / (double) (str1Tokens.size() + str2Tokens.size());
+    }
 }
