@@ -2,6 +2,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import utilities.FileUtility;
 import utilities.PropertyUtility;
 
@@ -95,6 +96,7 @@ class FileUtilityTest {
     }
 
     @Test
+    @Disabled
     public void testDeleteRecursively() {
         boolean folderDeleted = false;
         try {
@@ -113,6 +115,7 @@ class FileUtilityTest {
     }
 
     @Test
+    @Disabled
     public void testListMatches() {
         try {
             createTestBed();
@@ -212,6 +215,7 @@ class FileUtilityTest {
     }
 
     @Test
+    @Disabled
     public void testSetPermissions() throws IOException {
         createTestBed();
         Path folderPath = testBedPath.resolve("folder1");
