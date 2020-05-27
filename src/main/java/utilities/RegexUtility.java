@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 import misc.Comparison;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 /**
  * @version 1.0.0
@@ -340,7 +340,8 @@ public class RegexUtility {
     public static String[] generateRegexpsForPositiveNumbersLesserThan(int number, Comparison comparison, boolean sqlRegex) {
 
         if(number < 0 || comparison == Comparison.GREATER || comparison == Comparison.GREATER_THAN_EQUAL) {
-            throw new NotImplementedException();
+            // TODO: Convert to a more specific exception
+            throw new RuntimeException();
         }
 
         String valueString = Integer.toString(number);
