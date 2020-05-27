@@ -6,10 +6,12 @@ public class StringUtility {
 
     /**
      * Repeats the given string the specified number of times and returns it as a single string output.
+     * @deprecated use {@link String#repeat(int)} instead.
      * @param str String too repeat
      * @param repeatCount Number of times to repeat str
      * @return The string with repeatCount contiguous occurrences of str.
      */
+    @Deprecated
     public static String repeat(String str, long repeatCount) {
         if(repeatCount < 0) {
             throw new IllegalArgumentException(

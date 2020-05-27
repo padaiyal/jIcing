@@ -3,7 +3,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import utilities.RegexUtility;
 
 import java.util.ArrayList;
@@ -142,7 +141,7 @@ class RegexUtilityTest {
 
         // Assert that supplying negative numbers throw NotImplementedException
         Assertions.assertThrows(
-                NotImplementedException.class,
+                RuntimeException.class,
                 () -> RegexUtility.generateRegexpsForPositiveNumbersLesserThan(-100, comparison, sqlRegex)
         );
 
@@ -191,7 +190,7 @@ class RegexUtilityTest {
     )
     void testGenerateRegexpsForNumberComparisonNotImplemented(int number, Comparison comparison, boolean sqlRegex) {
         Assertions.assertThrows(
-                NotImplementedException.class,
+                RuntimeException.class,
                 () -> testComparisonRegex(number, comparison, sqlRegex)
         );
     }
