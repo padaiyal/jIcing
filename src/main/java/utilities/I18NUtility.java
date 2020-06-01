@@ -7,11 +7,11 @@ import java.util.*;
 
 public class I18NUtility {
 
-    private static Logger logger = LogManager.getLogger(I18NUtility.class);
-    private static String language = PropertyUtility.getProperty("common.language");
-    private static String region = PropertyUtility.getProperty("common.region");
-    private static Locale locale = new Locale(language, region);
-    private static Map<String, ResourceBundle> resourceBundles = Collections.synchronizedMap(new HashMap<>());
+    private static final Logger logger = LogManager.getLogger(I18NUtility.class);
+    private static final String language = PropertyUtility.getProperty("common.language");
+    private static final String region = PropertyUtility.getProperty("common.region");
+    private static final Locale locale = new Locale(language, region);
+    private static final Map<String, ResourceBundle> resourceBundles = Collections.synchronizedMap(new HashMap<>());
 
     static {
         String defaultResourceBundleName = PropertyUtility.getProperty("utilities.I18NUtility.resourcebundle.default");
@@ -81,9 +81,9 @@ public class I18NUtility {
      * @param resourceBundleName Resource bundle to add
      */
     public synchronized static void addResourceBundle(String resourceBundleName) {
-        // Cannot internationalize as the reuqired I18N string cannot be found without adding the relevant resource bundle
-        logger.debug("Adding resource bundle - " + resourceBundleName);
-        ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceBundleName, locale);
+        // Cannot internationalize as the required I18N string cannot be found without adding the relevant resource bundle
+        logger.info("Adding resource bundle - " + resourceBundleName);
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(I18NUtility.class.getPackageName() + "." + resourceBundleName, locale);
         resourceBundles.put(resourceBundleName, resourceBundle);
     }
 
