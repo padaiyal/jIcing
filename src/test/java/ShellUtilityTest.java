@@ -31,17 +31,12 @@ class ShellUtilityTest {
         timeoutDuration = Duration.ofSeconds(5);
 
         OS os = OS.getOs();
-        
-        switch(os) {
-            case WINDOWS:
-                typeOfShell = ShellUtility.TypeOfShell.CMD;
-                break;
-            case LINUX:
-                typeOfShell = ShellUtility.TypeOfShell.BASH;
-                break;
-            default:
-                typeOfShell = null;
-        }
+
+        typeOfShell = switch(os) {
+            case WINDOWS -> ShellUtility.TypeOfShell.CMD;
+            case LINUX -> ShellUtility.TypeOfShell.BASH;
+            default -> null;
+        };
     }
 
     @Test
