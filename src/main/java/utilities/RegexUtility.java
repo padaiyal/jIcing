@@ -364,15 +364,15 @@ public class RegexUtility {
                     .filter(digitIndex -> digits[digitIndex] > 0)
                     .mapToObj(digitIndex -> valueString.substring(0, digitIndex)
                             + "[0-" + Math.max(digits[digitIndex] - 1, 0) + "]"
-                            + StringUtility.repeat(allPossibleDigitValues,
-                            digits.length - (digitIndex + 1)))
+                            + allPossibleDigitValues.repeat(digits.length - (digitIndex + 1))
+                    )
                     .forEach(regexps::add);
             if(digits[digits.length - 1] > 0) {
                 regexps.add(valueString.substring(0, valueString.length() - 1)
                         + "[0-" + Math.max(digits[digits.length - 1] - 1, 0) + "]");
             }
             IntStream.range(1, digits.length)
-                    .mapToObj(index -> String.format("^%s$", StringUtility.repeat(allPossibleDigitValues, index)))
+                    .mapToObj(index -> String.format("^%s$", allPossibleDigitValues.repeat(index)))
                     .forEach(regexps::add);
         }
 

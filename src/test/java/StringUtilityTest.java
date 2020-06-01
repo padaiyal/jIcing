@@ -23,6 +23,7 @@ class StringUtilityTest {
     )
     void testRepeatString(String string, long repeatCount, String expectedOutput) {
         try {
+            @SuppressWarnings("deprecation")
             String actualOutput = StringUtility.repeat(string, repeatCount);
             Assertions.assertEquals(expectedOutput, actualOutput);
         }
