@@ -40,33 +40,15 @@ public class Sorter<T extends Comparable<T>> {
 
     public T[] sort(T[] input, SortingTechnique sortingTechnique) {
         switch (sortingTechnique) {
-            case SELECTION_SORT:
-                inPlaceSelectionSort(input);
-                return input;
-            case BUBBLE_SORT:
-                inPlaceBubbleSort(input);
-                return input;
-            case INSERTION_SORT:
-                inPlaceInsertionSort(input);
-                return input;
-//            case QUICK_SORT:
-//                return quickSort(input);
-            case TIM_SORT:
-                timSort(input);
-                return input;
-            case COUNTING_SORT:
-                inPlaceCountingSort(input);
-                return input;
-            case SHELL_SORT:
-                inPlaceShellSort(input);
-                return input;
-            case CYCLE_SORT:
-                inPlaceShellSort(input);
-                return input;
-            default:
-                inPlaceCountingSort(input);
-                return input;
+            case SELECTION_SORT -> inPlaceSelectionSort(input);
+            case BUBBLE_SORT -> inPlaceBubbleSort(input);
+            case INSERTION_SORT -> inPlaceInsertionSort(input);
+            case TIM_SORT -> timSort(input);
+            case SHELL_SORT, CYCLE_SORT -> inPlaceShellSort(input);
+            // case QUICK_SORT -> return quickSort(input);
+            default -> inPlaceCountingSort(input);
         }
+        return input;
     }
 
     private void inPlaceSelectionSort(T[] input) {
