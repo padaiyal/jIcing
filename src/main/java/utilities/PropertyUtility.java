@@ -5,19 +5,19 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PropertyUtility {
 
-    private static Logger logger = LogManager.getLogger(PropertyUtility.class);
-    private static Set<String> propertyFileNames = Collections.synchronizedSet(new HashSet<>());
-    private static Set<Properties> propertyFiles = Collections.synchronizedSet(new HashSet<>());
+    private static final Logger logger = LogManager.getLogger(PropertyUtility.class);
+    private static final Set<String> propertyFileNames = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<Properties> propertyFiles = Collections.synchronizedSet(new HashSet<>());
 
     static {
-        propertyFileNames.add("src/main/resources/icing.properties");
+        propertyFileNames.add("icing.properties");
         buildPropertyFileSet();
     }
 
@@ -30,8 +30,9 @@ public class PropertyUtility {
                 propertyFileNames.stream()
                         .map(propertyFileName -> {
                             Properties propertyFile = new Properties();
-                            try {
-                                propertyFile.load(Files.newInputStream(Paths.get(String.valueOf(propertyFileName))));
+                            logger.info("Loading property file: " + Paths.get(propertyFileName).toAbsolutePath());
+                            try(InputStream inputStream = PropertyUtility.class.getResourceAsStream(propertyFileName)) {
+                                propertyFile.load(inputStream);
                             } catch (IOException e) {
                                 logger.error(e);
                             }
@@ -80,7 +81,7 @@ public class PropertyUtility {
      * @param propertyFileName Property file to add
      */
     public synchronized static void addPropertyFile(String propertyFileName) throws FileNotFoundException {
-        if (Files.exists(Paths.get(propertyFileName))) {
+        if (PropertyUtility.class.getResource(propertyFileName) != null) {
             propertyFileNames.add(propertyFileName);
             buildPropertyFileSet();
         } else {

@@ -28,7 +28,7 @@ class PropertyUtilityTest {
 
     @Test
     void testAddValidPropertyFile() throws FileNotFoundException {
-        PropertyUtility.addPropertyFile("src/main/resources/test.properties");
+        PropertyUtility.addPropertyFile("test.properties");
         String value = PropertyUtility.getProperty("test1");
         Assertions.assertEquals("TEST1", value);
     }
@@ -47,9 +47,9 @@ class PropertyUtilityTest {
 
     @Test
     void testRemovePropertyFile() throws FileNotFoundException {
-        PropertyUtility.addPropertyFile("src/main/resources/test.properties");
+        PropertyUtility.addPropertyFile("test.properties");
         PropertyUtility.getProperty("test2");
-        PropertyUtility.removePropertyFile("src/main/resources/test.properties");
+        PropertyUtility.removePropertyFile("test.properties");
         boolean fileNotFoundExceptionThrown = false;
         try {
             PropertyUtility.getProperty("test2");
