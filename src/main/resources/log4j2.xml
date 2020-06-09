@@ -9,7 +9,7 @@
         <Logger name="utilities" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Root level="error">
+        <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
