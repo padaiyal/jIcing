@@ -19,7 +19,7 @@ class FileUtilityTest {
     final Path testBedPath;
 
     public FileUtilityTest() {
-        testBedPath = Paths.get(PropertyUtility.getProperty("common.dir.temp")).resolve("FUT");
+        testBedPath = Paths.get(PropertyUtility.getProperty("common.dir.temp")).resolve("FUT").toAbsolutePath();
     }
 
     public void createTestBed() {
