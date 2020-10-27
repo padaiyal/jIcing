@@ -58,7 +58,7 @@ public class ShellUtility {
                 }
                 response = executeCommand(command);
                 if (response.getReturnCode() == 0) {
-                    shells.put(typeOfShell, Paths.get(response.getOutput(TypeOfOutput.STDOUT).split("\n").trim()));
+                    shells.put(typeOfShell, Paths.get(response.getOutput(TypeOfOutput.STDOUT).split("\n")[0].trim()));
                 }
             } catch (IOException | InterruptedException | OsNotFoundException | TimeoutException e) {
                 logger.error(e);
