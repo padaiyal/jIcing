@@ -24,7 +24,7 @@ class FileUtilityTest {
 
     public void createTestBed() {
         try {
-            Files.createDirectory(testBedPath);
+            Files.createDirectories(testBedPath);
         } catch (IOException e) {
             logger.error(e);
         }
