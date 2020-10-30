@@ -326,10 +326,14 @@ public class ShellUtility {
      */
     public static Response executeCommand(Command command, Duration timeOutDuration) throws IOException, InterruptedException, ShellNotFoundException, OsNotFoundException, TimeoutException {
         if (os == OS.LINUX) {
-            return executeCommand(command, TypeOfShell.BASH);
+            return executeCommand(command, TypeOfShell.BASH, timeOutDuration);
         } else if (os == OS.WINDOWS) {
-            Response response = executeCommand(command, TypeOfShell.CMD);
-            if (response.getReturnCode() == 127) { // If the executable isn't found
+            Response response;
+            try {
+                response = executeCommand(command, TypeOfShell.CMD, timeOutDuration);
+            }
+            catch (ShellNotFoundException e) {
+                logger.warn(e);
                 response = executeCommand(command, TypeOfShell.POWERSHELL, timeOutDuration);
             }
             return response;
