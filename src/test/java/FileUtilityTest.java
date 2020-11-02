@@ -32,14 +32,16 @@ class FileUtilityTest {
     private static final ConcurrentHashMap<String, Queue<WatchEvent.Kind<?>>> actualPathToEventKindMap = new ConcurrentHashMap<>();
 
     public FileUtilityTest() {
-        testBedPath = Paths.get(PropertyUtility.getProperty("common.dir.temp")).resolve("FUT");
+        testBedPath = Paths.get(PropertyUtility.getProperty("common.dir.temp"))
+            .resolve("FUT")
+            .toAbsolutePath();
     }
 
     public void createTestBed() {
         clearTestBed();
 
         try {
-            Files.createDirectory(testBedPath);
+            Files.createDirectories(testBedPath);
         } catch (IOException e) {
             logger.error(e);
         }
