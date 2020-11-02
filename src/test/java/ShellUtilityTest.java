@@ -25,8 +25,8 @@ class ShellUtilityTest {
 
         nonTerminatingCommand = new ShellUtility.Command();
         nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.BASH, "cat");
-        nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.CMD, "");
-        nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.POWERSHELL, "");
+        nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.CMD, "ping 127.0.0.1 -n 4294967295");
+        nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.POWERSHELL, "ping 127.0.0.1 -n 4294967295");
 
         timeoutDuration = Duration.ofSeconds(5);
 

@@ -58,7 +58,29 @@ public class ShellUtility {
                 }
                 response = executeCommand(command);
                 if (response.getReturnCode() == 0) {
-                    shells.put(typeOfShell, Paths.get(response.getOutput(TypeOfOutput.STDOUT).trim()));
+                    // If multiple shell paths are found, choose the first one.
+                    String shellPath = Arrays.stream(
+                            response.getOutput(TypeOfOutput.STDOUT)
+                              .split("[\n\r]")
+                        )
+                        .filter(tempShellPath -> !tempShellPath.isEmpty())
+                        .findFirst()
+                        .orElse(null);
+                    if(shellPath != null) {
+                        shellPath = shellPath.trim();
+                        shells.put(
+                            typeOfShell,
+                            Paths.get(shellPath)
+                        );
+                    } else {
+                        logger.warn(
+                            "Not adding {} shell path as the first path is null. " +
+                                    "Here are all the paths identified for {} - <{}>",
+                            typeOfShell,
+                            typeOfShell,
+                            response.getOutput(TypeOfOutput.STDOUT)
+                        );
+                    }
                 }
             } catch (IOException | InterruptedException | OsNotFoundException | TimeoutException e) {
                 logger.error(e);
@@ -74,7 +96,16 @@ public class ShellUtility {
     public enum TypeOfShell {
         POWERSHELL,
         CMD,
-        BASH,
+        BASH;
+
+        /**
+         * Returns the template to execute a command using a specified shell.
+         * @param typeOfShell Type of shell for which a template is to be retrieved and returned.
+         * @return The template to execute a command in the specified shell.
+         */
+        public static String getCommandTemplate(TypeOfShell typeOfShell) {
+            return PropertyUtility.getProperty("utilities.ShellUtility.template." + typeOfShell.toString());
+        }
     }
 
     public static class ShellNotFoundException extends Exception {
@@ -288,12 +319,12 @@ public class ShellUtility {
         );
         if (shells.containsKey(typeOfShell)) {
             return executeCommand(
-                    String.format(
-                            I18NUtility.getString("utilities.ShellUtility.execute"),
-                            shells.get(typeOfShell).toAbsolutePath().toString(),
-                            command.getCommand(typeOfShell)
-                    ),
-                    timeOutDuration
+                String.format(
+                    TypeOfShell.getCommandTemplate(typeOfShell),
+                    shells.get(typeOfShell).toAbsolutePath().toString(),
+                    command.getCommand(typeOfShell)
+                ),
+                timeOutDuration
             );
         } else {
             throw new ShellNotFoundException(typeOfShell);
