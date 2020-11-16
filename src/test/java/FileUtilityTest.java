@@ -1,31 +1,49 @@
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import utilities.FileUtility;
 import utilities.I18NUtility;
+import utilities.OS;
 import utilities.PropertyUtility;
 import utilities.ShellUtility;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.TreeSet;
+
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 class FileUtilityTest {
 
-    private Logger logger = LogManager.getLogger(FileUtilityTest.class);
-    private static int thread_sleep = Integer.parseInt(
+    private final Logger logger = LogManager.getLogger(FileUtilityTest.class);
+    private static final int fileActionWaitTimeInMs = Integer.parseInt(
             PropertyUtility.getProperty("test.FileUtilityTest.action.perform.waittime.milliseconds")
     );
     private final Path testBedPath;
@@ -47,19 +65,19 @@ class FileUtilityTest {
         }
         // Create 2 folders with a txt file in each with the same name of the folder - folders1 to folders2
         // Create 2 folders with a txt file in each with the same name of the folder - folder1 to folder2
-        Arrays.asList("folder", "folders")
-                .stream()
-                .forEach(baseName ->
-                        IntStream.range(1,3)
-                                .forEach(i -> {
-                                    try {
-                                        Files.createDirectory(testBedPath.resolve(baseName+i));
-                                        Files.createFile(testBedPath.resolve(baseName+i).resolve(baseName+i+".txt"));
-                                    } catch (IOException e) {
-                                        logger.error(e);
-                                    }
-                                })
-                );
+        //noinspection StreamToLoop
+        Stream.of("folder", "folders")
+            .forEach(baseName ->
+                IntStream.range(1,3)
+                    .forEach(i -> {
+                        try {
+                            Files.createDirectory(testBedPath.resolve(baseName+i));
+                            Files.createFile(testBedPath.resolve(baseName+i).resolve(baseName+i+".txt"));
+                        } catch (IOException e) {
+                            logger.error(e);
+                        }
+                    })
+            );
 
         /* Create 3 folders (fold3 to fold5) with a txt file in each with the same name of the folder and another
         child folder and grandchild folder. */
@@ -84,7 +102,6 @@ class FileUtilityTest {
         } catch (IOException e) {
             logger.error(e);
         }
-
     }
 
     public void clearTestBed() {
@@ -203,13 +220,13 @@ class FileUtilityTest {
             opMap.put("fold.*[3-4]", Arrays.asList("fold3", "fold4"));
             opMap.put(".*old.*", Arrays.asList("folder1", "folder2", "folders1", "folders2", "fold3", "fold4",
                     "fold5"));
-            opMap.put("abc.*", Arrays.asList());
+            opMap.put("abc.*", Collections.emptyList());
             for (String regex : opMap.keySet()) {
                 List<String> actualOp = FileUtility.listMatches(testBedPath, regex)
                         .stream()
                         .map(path -> path.getFileName().toString())
                         .collect(Collectors.toList());
-                Assertions.assertEquals(new TreeSet(opMap.get(regex)), new TreeSet(actualOp), regex);
+                Assertions.assertEquals(new TreeSet<>(opMap.get(regex)), new TreeSet<>(actualOp), regex);
             }
         }
         catch(Exception e) {
@@ -221,59 +238,67 @@ class FileUtilityTest {
         }
     }
 
+    /**
+        TODO: Try to listMatch with the following regexs
+            folder.*
+            folder\d+
+            fold.*\d+
+            fold\d+
+            fold.*[3-5]
+            abc
+            abc.*
+    */
+    @SuppressWarnings("unused")
     public void testTreeMatches() {
-                /*
-        Try to listMatch with the following regexs
-            folder.*
-            folder\d+
-            fold.*\d+
-            fold\d+
-            fold.*[3-5]
-            abc
-            abc.*
-        */
+
     }
 
+    /**
+     TODO: Try to DeleteIfMatch with the following regexs, between each regex delete all remnant and recreate all folders/
+         files
+         abc
+         abc.*
+         folder.*
+         folder\d+
+         fold.*\d+
+         fold\d+
+         fold.*[3-5]
+    */
+    @SuppressWarnings("unused")
     public void testDeleteIfMatches() {
-                        /*
-        Try to DeleteIfMatch with the following regexs, between each regex delete all remnant and recreate all folders/
-        files
-            abc
-            abc.*
-            folder.*
-            folder\d+
-            fold.*\d+
-            fold\d+
-            fold.*[3-5]
-         */
+
     }
 
+    /**
+     TODO: Try to setPermissionsIfMatches followed by DeleteIfMatch with the following regexs, between each regex delete
+         all remnant and recreate all folders/files
+         abc
+         abc.*
+         folder.*
+         folder\d+
+         fold.*\d+
+         fold\d+
+         fold.*[3-5]
+     */
+    @SuppressWarnings("unused")
     public void testSetPermissionsIfMatches() {
-                       /*
-        Try to setPermissionsIfMatches followed by DeleteIfMatch with the following regexs, between each regex delete
-        all remnant and recreate all folders/files
-            abc
-            abc.*
-            folder.*
-            folder\d+
-            fold.*\d+
-            fold\d+
-            fold.*[3-5]
-         */
+
     }
 
-    public void testSetAttributeIfMatches() {
-                               /*
-        Try to setAttributeIfMatches and verify with the following regexs, between each regex delete
+    /**
+    TODO: Try to setAttributeIfMatches and verify with the following regexs, between each regex delete
         all remnant and recreate all folders/files
-            abc
-            abc.*
-            folder.*
-            folder\d+
-            fold.*\d+
-            fold\d+
-            fold.*[3-5]
-         */
+        abc
+        abc.*
+        folder.*
+        folder\d+
+        fold.*\d+
+        fold\d+
+        fold.*[3-5]
+    */
+    @SuppressWarnings("unused")
+    public void testSetAttributeIfMatches() {
+
     }
 
     @Test
@@ -299,9 +324,9 @@ class FileUtilityTest {
 
             FileUtility.deleteRecursively(folderPath);
             Assertions.assertTrue(actualResult,
-                    "Able to create "
-                            .concat(filePath.toString())
-                            .concat(". Failed to set READ ONLY permission to ".concat(folderPath.toString())));
+                "Able to create "
+                    .concat(filePath.toString())
+                    .concat(". Failed to set READ ONLY permission to ".concat(folderPath.toString())));
             clearTestBed();
         }
     }
@@ -384,23 +409,23 @@ class FileUtilityTest {
      */
     @ParameterizedTest
     @CsvSource(
-            {
-                "fold4, fold4", // existing directory
-                "fold4/sdsds/, fold4/", // non existing directory
-                "fold1, .", // current directory
-                "../../../../../.., /", // root directory
-                "../lol, .." // parent directory
-            }
+        {
+            "fold4, fold4", // existing directory
+            "fold4/sdsds/, fold4/", // non existing directory
+            "fold1, .", // current directory
+            "../../../../../.., /", // root directory
+            "../lol, .." // parent directory
+        }
     )
     public void testGetClosestExistingParent(String path, String expectedClosestExistingParentPath) {
         createTestBed();
         Path pathToFindClosestExistingParent = testBedPath.resolve(path);
         Path expectedClosestExistingParent = testBedPath.resolve(expectedClosestExistingParentPath)
-                .toAbsolutePath()
-                .normalize();
+            .toAbsolutePath()
+            .normalize();
         Path actualClosestExistingParent = FileUtility.getClosestExistingParent(pathToFindClosestExistingParent)
-                .toAbsolutePath()
-                .normalize();
+            .toAbsolutePath()
+            .normalize();
 
         Assertions.assertEquals(expectedClosestExistingParent.toString(), actualClosestExistingParent.toString());
         clearTestBed();
@@ -415,117 +440,100 @@ class FileUtilityTest {
         // Individual null inputs
         Assertions.assertThrows(
             NullPointerException.class,
-            () -> {
-                FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
                     null,
                     1,
                     (path, watchEvent) -> {},
                     StandardWatchEventKinds.ENTRY_CREATE
-                );
-            }
+                )
         );
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath,
-                            -1,
-                            (path, watchEvent) -> {},
-                            StandardWatchEventKinds.ENTRY_CREATE
-                    );
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    testBedPath,
+                    -1,
+                    (path, watchEvent) -> {},
+                    StandardWatchEventKinds.ENTRY_CREATE
+                )
         );
         Assertions.assertThrows(
                 NullPointerException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath,
-                            1,
-                            null,
-                            StandardWatchEventKinds.ENTRY_CREATE
-                    );
-                }
+                () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                        testBedPath,
+                        1,
+                        null,
+                        StandardWatchEventKinds.ENTRY_CREATE
+                    )
         );
+        //noinspection ConfusingArgumentToVarargsMethod
         Assertions.assertThrows(
-                NullPointerException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath,
-                            1,
-                            (path, watchEvent) -> {},
-                            null
-                    );
-                }
+            NullPointerException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                testBedPath,
+                1,
+                (path, watchEvent) -> {},
+                null
+            )
         );
 
         // All null inputs
+        //noinspection ConfusingArgumentToVarargsMethod
         Assertions.assertThrows(
-                NullPointerException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            null,
-                            -1,
-                            null,
-                            null
-                    );
-                }
+            NullPointerException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    null,
+                    -1,
+                    null,
+                    null
+                )
         );
 
         // Non existing registration path
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath.resolve("wasntme"),
-                            1,
-                            (path, watchEvent) -> {},
-                            StandardWatchEventKinds.ENTRY_CREATE
-                    );
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    testBedPath.resolve("wasntme"),
+                    1,
+                    (path, watchEvent) -> {},
+                    StandardWatchEventKinds.ENTRY_CREATE
+                )
         );
 
         // Path is not directory
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath.resolve("fold4")
-                                    .resolve("fold4.txt"),
-                            1,
-                            (path, watchEvent) -> {},
-                            StandardWatchEventKinds.ENTRY_CREATE
-                    );
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    testBedPath.resolve("fold4")
+                            .resolve("fold4.txt"),
+                    1,
+                    (path, watchEvent) -> {},
+                    StandardWatchEventKinds.ENTRY_CREATE
+                )
         );
 
         // Empty WatchEventKind
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath,
-                            1,
-                            (path, watchEvent) -> {},
-                            new WatchEvent.Kind[]{}
-                    );
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    testBedPath,
+                    1,
+                    (path, watchEvent) -> {}
+                )
         );
 
         // More than four WatchEventKind
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                            testBedPath,
-                            1,
-                            (path, watchEvent) -> {},
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_CREATE
-                    );
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
+                    testBedPath,
+                    1,
+                    (path, watchEvent) -> {},
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_CREATE
+                )
         );
         clearTestBed();
     }
@@ -538,26 +546,21 @@ class FileUtilityTest {
         createTestBed();
         // Null path
         Assertions.assertThrows(
-                NullPointerException.class,
-                () -> {
-                    FileUtility.deRegisterWatchServiceForDirectory(null);
-                }
+            NullPointerException.class,
+            () -> FileUtility.deRegisterWatchServiceForDirectory(null)
         );
 
         // Existing file
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.deRegisterWatchServiceForDirectory(testBedPath.resolve("fold4").resolve("fold4.txt"));
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.deRegisterWatchServiceForDirectory(testBedPath.resolve("fold4")
+                    .resolve("fold4.txt"))
         );
 
         // Non-existing path
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    FileUtility.deRegisterWatchServiceForDirectory(testBedPath.resolve("wasntme.txt"));
-                }
+            IllegalArgumentException.class,
+            () -> FileUtility.deRegisterWatchServiceForDirectory(testBedPath.resolve("wasntme.txt"))
         );
         clearTestBed();
     }
@@ -585,36 +588,44 @@ class FileUtilityTest {
         }
     )
     public void testFolderWatchServiceRegistering(String relativePath, String action, int maxDepth) throws IOException, InterruptedException {
+        Assumptions.assumeFalse(
+            OS.getOs() == OS.MAC_OS_X,
+            "Skipping WatchService testing for " +
+            "MAC OS X as there's a known issue in the JDK that takes a lot of time to generate watch service events\n" +
+            " and sometimes doesn't generate them. Since we cannot reliably test WatchService on MAC OS X, we skip \n" +
+            "it for MAC OS X.\nhttps://bugs.openjdk.java.net/browse/JDK-7133447"
+        );
+
         createTestBed();
         final HashMap<String, Queue<WatchEvent.Kind<?>>> expectedPathToEventKindMap;
         actualPathToEventKindMap.clear();
 
         Path pathToRegister = testBedPath.resolve(relativePath);
         FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                testBedPath,
-                maxDepth,
-                (path, watchEvent) -> {
-                    String absolutePathString = path.toAbsolutePath().toString();
-                    actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
-                    actualPathToEventKindMap.get(absolutePathString)
-                            .add(watchEvent.kind());
+            testBedPath,
+            maxDepth,
+            (path, watchEvent) -> {
+                String absolutePathString = path.toAbsolutePath().toString();
+                actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
+                actualPathToEventKindMap.get(absolutePathString)
+                        .add(watchEvent.kind());
 
-                    logger.info(
-                            String.format(
-                                    I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
-                                    Instant.now(),
-                                    watchEvent.kind(),
-                                    path
-                            )
-                    );
-                },
-                StandardWatchEventKinds.ENTRY_CREATE,
-                StandardWatchEventKinds.ENTRY_DELETE,
-                StandardWatchEventKinds.ENTRY_MODIFY,
-                StandardWatchEventKinds.OVERFLOW
+                logger.info(
+                        String.format(
+                                I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
+                                Instant.now(),
+                                watchEvent.kind(),
+                                path
+                        )
+                );
+            },
+            StandardWatchEventKinds.ENTRY_CREATE,
+            StandardWatchEventKinds.ENTRY_DELETE,
+            StandardWatchEventKinds.ENTRY_MODIFY,
+            StandardWatchEventKinds.OVERFLOW
         );
 
-        Function<Path, Queue<WatchEvent.Kind<?>>> expectedEventsOracle = null;
+        Function<Path, Queue<WatchEvent.Kind<?>>> expectedEventsOracle;
         switch (action) {
             case "FOLDER_CREATE" -> {
                 expectedEventsOracle = path -> {
@@ -627,10 +638,10 @@ class FileUtilityTest {
                 };
                 expectedPathToEventKindMap = getExpectedEvents(pathToRegister, expectedEventsOracle, maxDepth);
                 createDirectoriesRecursively(
-                        pathToRegister,
-                        Integer.parseInt(
-                                PropertyUtility.getProperty("test.FileUtilityTest.create.directories.recursively.waittime.milliseconds")
-                        )
+                    pathToRegister,
+                    Integer.parseInt(
+                        PropertyUtility.getProperty("test.FileUtilityTest.create.directories.recursively.waittime.milliseconds")
+                    )
                 );
             }
             case "FILE_CREATE" -> {
@@ -644,10 +655,10 @@ class FileUtilityTest {
                 };
                 expectedPathToEventKindMap = getExpectedEvents(pathToRegister, expectedEventsOracle, maxDepth);
                 createDirectoriesRecursively(
-                        pathToRegister.getParent(),
-                        Integer.parseInt(
-                            PropertyUtility.getProperty("test.FileUtilityTest.create.directories.recursively.waittime.milliseconds")
-                        )
+                    pathToRegister.getParent(),
+                    Integer.parseInt(
+                        PropertyUtility.getProperty("test.FileUtilityTest.create.directories.recursively.waittime.milliseconds")
+                    )
                 );
                 Files.createFile(pathToRegister);
             }
@@ -670,20 +681,20 @@ class FileUtilityTest {
                 FileUtility.deleteRecursively(pathToRegister);
             }
             default -> throw new IllegalArgumentException(
-                    String.format(
-                            I18NUtility.getString("input.validation.invalidActionOrArgumentMessage"),
-                            action
-                    )
+                String.format(
+                    I18NUtility.getString("input.validation.invalidActionOrArgumentMessage"),
+                    action
+                )
             );
         }
 
         logger.info(
-                String.format(
-                        I18NUtility.getString("test.FileUtilityTest.waitingForFileChangesMessage"),
-                        thread_sleep/1000
-                )
+            String.format(
+                I18NUtility.getString("test.FileUtilityTest.waitingForFileChangesMessage"),
+                fileActionWaitTimeInMs /1000
+            )
         );
-        Thread.sleep(thread_sleep);
+        Thread.sleep(fileActionWaitTimeInMs);
         HashMap<String, Queue<WatchEvent.Kind<?>>> actualPathToEventKindMapCopy = new HashMap<>(actualPathToEventKindMap);
         Set<String> expectedPathsToMonitor = expectedPathToEventKindMap.keySet();
         Set<String> actualPathsToMonitor = actualPathToEventKindMapCopy.keySet();
@@ -701,11 +712,11 @@ class FileUtilityTest {
             actualPathToEventKindMapCopy.get(expectedPath)
                     .toArray(expectedEvents);
             Assertions.assertArrayEquals(expectedEvents,
-                    actualEvents,
-                    String.format(
-                            I18NUtility.getString("test.FileUtilityTest.noMatchingSetOfEventsErrorMessage"),
-                            expectedPath
-                    )
+                actualEvents,
+                String.format(
+                    I18NUtility.getString("test.FileUtilityTest.noMatchingSetOfEventsErrorMessage"),
+                    expectedPath
+                )
             );
         });
     }
@@ -726,6 +737,14 @@ class FileUtilityTest {
         }
     )
     public void testFolderWatchServiceDeRegistering(String pathToRegisterString, String pathToDeRegisterString, int maxDepth) throws IOException, InterruptedException {
+        Assumptions.assumeFalse(
+            OS.getOs() == OS.MAC_OS_X,
+            "Skipping WatchService testing for " +
+            "MAC OS X as there's a known issue in the JDK that takes a lot of time to generate watch service events\n" +
+            " and sometimes doesn't generate them. Since we cannot reliably test WatchService on MAC OS X, we skip \n" +
+            "it for MAC OS X.\nhttps://bugs.openjdk.java.net/browse/JDK-7133447"
+        );
+
         // Test set up
         createTestBed();
 
@@ -733,37 +752,37 @@ class FileUtilityTest {
             Path pathToRegister = testBedPath.resolve(pathToRegisterString);
             actualPathToEventKindMap.clear();
             FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                    pathToRegister,
-                    maxDepth,
-                    (path, watchEvent) -> {
-                        logger.info(
-                                String.format(
-                                    I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
-                                    Instant.now(),
-                                    watchEvent.kind(),
-                                    path
-                                )
-                        );
-                        String absolutePathString = path.toAbsolutePath().toString();
-                        actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
-                        actualPathToEventKindMap.get(absolutePathString)
-                                .add(watchEvent.kind());
+                pathToRegister,
+                maxDepth,
+                (path, watchEvent) -> {
+                    logger.info(
+                        String.format(
+                            I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
+                            Instant.now(),
+                            watchEvent.kind(),
+                            path
+                        )
+                    );
+                    String absolutePathString = path.toAbsolutePath().toString();
+                    actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
+                    actualPathToEventKindMap.get(absolutePathString)
+                        .add(watchEvent.kind());
 
-                    },
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                    StandardWatchEventKinds.OVERFLOW
+                },
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_DELETE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.OVERFLOW
             );
 
             // Perform actions to trigger the events
             Path createdFilePath = pathToRegister.resolve("parent_random.txt");
             Files.createFile(createdFilePath);
-            Thread.sleep(thread_sleep);
+            Thread.sleep(fileActionWaitTimeInMs);
 
             Queue<WatchEvent.Kind<?>> eventsForRegisteredPath = actualPathToEventKindMap.get(
-                    createdFilePath.toAbsolutePath()
-                            .toString()
+                createdFilePath.toAbsolutePath()
+                    .toString()
             );
             // Assert actions have been logged
             Assertions.assertNotNull(eventsForRegisteredPath);
@@ -775,10 +794,10 @@ class FileUtilityTest {
         FileUtility.deRegisterWatchServiceForDirectory(pathToDeRegister);
         // Perform actions in sub path
         Files.createFile(pathToDeRegister.resolve("random.txt"));
-        Thread.sleep(thread_sleep);
+        Thread.sleep(fileActionWaitTimeInMs);
         Queue<WatchEvent.Kind<?>> eventsForDeRegisteredPath = actualPathToEventKindMap.get(
-                pathToDeRegister.toAbsolutePath()
-                        .toString()
+            pathToDeRegister.toAbsolutePath()
+                .toString()
         );
         // Assert actions have not been logged
         Assertions.assertNull(eventsForDeRegisteredPath);
@@ -800,6 +819,14 @@ class FileUtilityTest {
         }
     )
     public void testSelectiveRegisteringWatchService(String eventToRegisterString) throws IOException, InterruptedException {
+        Assumptions.assumeFalse(
+            OS.getOs() == OS.MAC_OS_X,
+            "Skipping WatchService testing for " +
+            "MAC OS X as there's a known issue in the JDK that takes a lot of time to generate watch service events\n" +
+            " and sometimes doesn't generate them. Since we cannot reliably test WatchService on MAC OS X, we skip \n" +
+            "it for MAC OS X.\nhttps://bugs.openjdk.java.net/browse/JDK-7133447"
+        );
+
         actualPathToEventKindMap.clear();
         createTestBed();
 
@@ -808,51 +835,51 @@ class FileUtilityTest {
             case("ENTRY_MODIFY") -> StandardWatchEventKinds.ENTRY_MODIFY;
             case("ENTRY_DELETE") -> StandardWatchEventKinds.ENTRY_DELETE;
             default -> throw new IllegalArgumentException(
-                    String.format(
-                            I18NUtility.getString("input.validation.invalidActionOrArgumentMessage"),
-                            "eventToRegisterString",
-                            eventToRegisterString
-                    )
+                String.format(
+                    I18NUtility.getString("input.validation.invalidActionOrArgumentMessage"),
+                    "eventToRegisterString",
+                    eventToRegisterString
+                )
             );
         };
 
         FileUtility.registerWatchServiceIfPathIsADirectoryAndIsNotAlreadyRegistered(
-                testBedPath,
-                3,
-                (path, watchEvent) -> {
-                    logger.info(
-                            String.format(
-                                    I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
-                                    Instant.now(),
-                                    watchEvent.kind(),
-                                    path
-                            )
-                    );
-                    String absolutePathString = path.toAbsolutePath().toString();
-                    actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
-                    actualPathToEventKindMap.get(absolutePathString)
-                            .add(watchEvent.kind());
-                },
-                eventToRegister
+            testBedPath,
+            3,
+            (path, watchEvent) -> {
+                logger.info(
+                    String.format(
+                        I18NUtility.getString("test.FileUtilityTest.loggedConsumerEventMessage"),
+                        Instant.now(),
+                        watchEvent.kind(),
+                        path
+                    )
+                );
+                String absolutePathString = path.toAbsolutePath().toString();
+                actualPathToEventKindMap.putIfAbsent(absolutePathString, new LinkedList<>());
+                actualPathToEventKindMap.get(absolutePathString)
+                        .add(watchEvent.kind());
+            },
+            eventToRegister
         );
         // Perform the actions to trigger the events
-        Thread.sleep(thread_sleep);
+        Thread.sleep(fileActionWaitTimeInMs);
         Path fileToCreatePath = testBedPath.resolve("selectiveRegistering.txt");
         Files.createFile(fileToCreatePath);
         Files.setLastModifiedTime(fileToCreatePath, FileTime.from(Instant.now()));
         Files.delete(fileToCreatePath);
-        Thread.sleep(thread_sleep);
+        Thread.sleep(fileActionWaitTimeInMs);
 
         String fileToCreatePathString = fileToCreatePath.toAbsolutePath().toString();
         HashMap<String, Queue<WatchEvent.Kind<?>>> actualPathToEventKindMapCopy = new HashMap<>(actualPathToEventKindMap);
         Queue<WatchEvent.Kind<?>> generatedEventsQueue = actualPathToEventKindMapCopy.get(fileToCreatePathString);
         // Assert that only the provided event has been logged
         Assertions.assertNotNull(
-                generatedEventsQueue,
-                String.format(
-                        I18NUtility.getString("test.FileUtilityTest.noEventsGeneratedForActionMessage"),
-                        fileToCreatePathString
-                )
+            generatedEventsQueue,
+            String.format(
+                I18NUtility.getString("test.FileUtilityTest.noEventsGeneratedForActionMessage"),
+                fileToCreatePathString
+            )
         );
         Assertions.assertEquals(generatedEventsQueue.size(),1);
         Assertions.assertEquals(eventToRegister, generatedEventsQueue.remove());
@@ -876,13 +903,13 @@ class FileUtilityTest {
         int nameCount = relativePathToBeModified.getNameCount();
         int nameCountToUse = Math.min(nameCount, maxDepth + 1);
         IntStream.range(1, nameCountToUse + 1)
-                .mapToObj(subPathEndIndex -> relativePathToBeModified.subpath(0, subPathEndIndex))
-                .map(closestExistingParentPathForRegisteredPath::resolve)
-                .forEach(subPath -> {
-                        Queue<WatchEvent.Kind<?>> subPathExpectedEvents = expectedEventsOracle.apply(subPath);
-                        expectedEvents.put(subPath.toAbsolutePath().toString(), subPathExpectedEvents);
-                    }
-                );
+            .mapToObj(subPathEndIndex -> relativePathToBeModified.subpath(0, subPathEndIndex))
+            .map(closestExistingParentPathForRegisteredPath::resolve)
+            .forEach(subPath -> {
+                    Queue<WatchEvent.Kind<?>> subPathExpectedEvents = expectedEventsOracle.apply(subPath);
+                    expectedEvents.put(subPath.toAbsolutePath().toString(), subPathExpectedEvents);
+                }
+            );
         return expectedEvents;
     }
 
@@ -896,10 +923,10 @@ class FileUtilityTest {
         Objects.requireNonNull(path);
         if(Files.exists(path) && !Files.isDirectory(path)) {
             throw new IllegalArgumentException(
-                    String.format(
-                            I18NUtility.getString("utilities.FileUtility.invalidDirPathMessage"),
-                            path
-                    )
+                String.format(
+                    I18NUtility.getString("utilities.FileUtility.invalidDirPathMessage"),
+                    path
+                )
             );
         }
 
@@ -907,8 +934,8 @@ class FileUtilityTest {
                 .relativize(path.toAbsolutePath());
         int nameCount = absoluteRPath.getNameCount();
         IntStream.range(1, nameCount + 1)
-                .mapToObj(index -> absoluteRPath.subpath(0, index))
-                .forEach(relativePathToCreate -> {
+            .mapToObj(index -> absoluteRPath.subpath(0, index))
+            .forEach(relativePathToCreate -> {
                     try {
                         Path pathToCreate = testBedPath.resolve(relativePathToCreate);
                         if (!Files.exists(pathToCreate)) {
@@ -918,6 +945,7 @@ class FileUtilityTest {
                     } catch (IOException | InterruptedException e) {
                         logger.error(e);
                     }
-                });
+                }
+            );
     }
 }
