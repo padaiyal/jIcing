@@ -22,11 +22,13 @@ class ShellUtilityTest {
         command.setCommand(ShellUtility.TypeOfShell.BASH, "ls -al /");
         command.setCommand(ShellUtility.TypeOfShell.CMD, "dir");
         command.setCommand(ShellUtility.TypeOfShell.POWERSHELL, "dir");
+        command.setCommand(ShellUtility.TypeOfShell.ZSH, "ls -al /");
 
         nonTerminatingCommand = new ShellUtility.Command();
         nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.BASH, "cat");
         nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.CMD, "ping 127.0.0.1 -n 4294967295");
         nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.POWERSHELL, "ping 127.0.0.1 -n 4294967295");
+        nonTerminatingCommand.setCommand(ShellUtility.TypeOfShell.ZSH, "cat");
 
         timeoutDuration = Duration.ofSeconds(5);
 
@@ -35,6 +37,7 @@ class ShellUtilityTest {
         typeOfShell = switch(os) {
             case WINDOWS -> ShellUtility.TypeOfShell.CMD;
             case LINUX -> ShellUtility.TypeOfShell.BASH;
+            case MAC_OS_X -> ShellUtility.TypeOfShell.ZSH;
             default -> null;
         };
     }

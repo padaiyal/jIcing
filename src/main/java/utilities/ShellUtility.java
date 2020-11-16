@@ -48,12 +48,20 @@ public class ShellUtility {
                             PropertyUtility.getProperty("utilities.ShellUtility.windows.where"),
                             typeOfShell.toString().toLowerCase()
                     );
-                } else if (os == OS.LINUX) {
+                }
+                else if (os == OS.LINUX) {
                     command = String.format(
                             PropertyUtility.getProperty("utilities.ShellUtility.linux.which"),
                             typeOfShell.toString().toLowerCase()
                     );
-                } else {
+                }
+                else if (os == OS.MAC_OS_X) {
+                    command = String.format(
+                            PropertyUtility.getProperty("utilities.ShellUtility.macos.which"),
+                            typeOfShell.toString().toLowerCase()
+                    );
+                }
+                else {
                     throw new OsNotFoundException(os);
                 }
                 response = executeCommand(command);
@@ -96,7 +104,8 @@ public class ShellUtility {
     public enum TypeOfShell {
         POWERSHELL,
         CMD,
-        BASH;
+        BASH,
+        ZSH;
 
         /**
          * Returns the template to execute a command using a specified shell.
@@ -349,17 +358,18 @@ public class ShellUtility {
      * Executes the specified command
      *
      * @param command         Command to execute
-     * @param timeOutDuration Time out for the cmmand execution
+     * @param timeOutDuration Time out for the command execution
      * @return The response of the command
      * @throws IOException          Thrown by ProcessBuilder::waitFor
      * @throws InterruptedException Thrown if the execution of the command is interrupted
-     * @throws TimeoutException     Thrown f the command execution exceeds specified timeout
+     * @throws TimeoutException     Thrown if the command execution exceeds specified timeout
      */
     public static Response executeCommand(Command command, Duration timeOutDuration) throws IOException, InterruptedException, ShellNotFoundException, OsNotFoundException, TimeoutException {
+        Response response;
         if (os == OS.LINUX) {
-            return executeCommand(command, TypeOfShell.BASH, timeOutDuration);
-        } else if (os == OS.WINDOWS) {
-            Response response;
+            response = executeCommand(command, TypeOfShell.BASH, timeOutDuration);
+        }
+        else if (os == OS.WINDOWS) {
             try {
                 response = executeCommand(command, TypeOfShell.CMD, timeOutDuration);
             }
@@ -367,10 +377,20 @@ public class ShellUtility {
                 logger.warn(e);
                 response = executeCommand(command, TypeOfShell.POWERSHELL, timeOutDuration);
             }
-            return response;
-        } else {
+        }
+        else if (os == OS.MAC_OS_X) {
+            try {
+                response = executeCommand(command, TypeOfShell.ZSH, timeOutDuration);
+            }
+            catch (ShellNotFoundException e) {
+                logger.warn(e);
+                response = executeCommand(command, TypeOfShell.BASH, timeOutDuration);
+            }
+        }
+        else {
             throw new OsNotFoundException(os);
         }
+        return response;
     }
 
     /**
