@@ -20,10 +20,10 @@ public class Main {
 		
 		tr.delete(900);
 		*/
-		//System.out.println("Total number of nodes - "+tr.size());
-		//System.out.println("Height of tree - "+tr.getHeight());
+		//logger.info("Total number of nodes - "+tr.size());
+		//logger.info("Height of tree - "+tr.getHeight());
 		//for(Tree<Integer> val:tr.breadthFirstTraversal()) {
-			//System.out.print(val.getValue()+", ");
+			//logger.info(val.getValue()+", ");
 		//}
 		
 		/*List<Integer> l= new DoublyLinkedList<Integer>();

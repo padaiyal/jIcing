@@ -1,5 +1,8 @@
 package datastructures.tree;
 import misc.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,12 +10,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class Tree<T extends Comparable<T>> {
+
 	T value;
 	Tree<T>[] children;
 	int children_count,current_index;
 	boolean tree_changed;
 	TypeIndependentOperations<T> TIO;
 	int tree_nodes_count;
+	private final Logger logger = LogManager.getLogger(Tree.class);
+
 	Tree(T value, int children_count) {
 		this.value = value;
 		children = new Tree[children_count];
@@ -44,7 +50,9 @@ public class Tree<T extends Comparable<T>> {
 			tree_changed=true;
 		}
 		else {
-			System.err.println("Node Capacity Full, Cannot have more children!");
+			logger.error(
+					I18NUtility.getString("datastructures.Tree.maxNumberOfChildrenNodesExceededMessage")
+			);
 		}
 			
 	}

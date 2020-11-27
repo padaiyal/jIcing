@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import sorting.Sorter;
+import utilities.I18NUtility;
 
 class SorterTest {
 
@@ -16,7 +17,11 @@ class SorterTest {
             Integer[] actualOutputArray = sorter.sort(inputArrayDupe, sortingTechnique);
             Assertions.assertTrue(
                     Arrays.equals(expectedOutputArray, actualOutputArray),
-                    sortingTechnique + " failed.\nResult: " + Arrays.toString(actualOutputArray)
+                    I18NUtility.getFormattedString(
+                            "test.SorterUtilityTest.sortingTechniqueFailedMessage",
+                            sortingTechnique,
+                            Arrays.toString(actualOutputArray)
+                    )
             );
         });
     }

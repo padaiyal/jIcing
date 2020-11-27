@@ -82,16 +82,18 @@ public class ShellUtility {
                         );
                     } else {
                         logger.warn(
-                            "Not adding {} shell path as the first path is null. " +
-                                    "Here are all the paths identified for {} - <{}>",
-                            typeOfShell,
-                            typeOfShell,
-                            response.getOutput(TypeOfOutput.STDOUT)
+                                I18NUtility.getFormattedString(
+                                        "utilities.ShellUtility.addingNullShellPathWarningMessage",
+                                        typeOfShell,
+                                        typeOfShell,
+                                        response.getOutput(TypeOfOutput.STDOUT)
+                                )
                         );
                     }
                 }
             } catch (IOException | InterruptedException | OsNotFoundException | TimeoutException e) {
                 logger.error(e);
+                throw new RuntimeException(e);
             }
         }
     }
@@ -251,7 +253,7 @@ public class ShellUtility {
                         "Duration"
                 )
         );
-        System.out.println(
+        logger.info(
                 I18NUtility.getFormattedString(
                         "utilities.ShellUtility.executing",
                         command

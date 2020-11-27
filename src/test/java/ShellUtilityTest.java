@@ -1,3 +1,6 @@
+import datastructures.tree.BinarySearchTree;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ class ShellUtilityTest {
     private static ShellUtility.Command nonTerminatingCommand;
     private static Duration timeoutDuration;
     private static ShellUtility.TypeOfShell typeOfShell;
+    private final Logger logger = LogManager.getLogger(ShellUtilityTest.class);
 
     @BeforeEach
     void prepare() {
@@ -44,7 +48,6 @@ class ShellUtilityTest {
 
     @Test
     public void testExecuteCommandString() throws IOException, InterruptedException, TimeoutException, ShellUtility.ShellNotFoundException {
-        System.out.println("SHELL - " + typeOfShell);
         String commandString = command.getCommand(typeOfShell);
         Response response = ShellUtility.executeCommand(commandString);
         Assertions.assertEquals(0, response.getReturnCode());

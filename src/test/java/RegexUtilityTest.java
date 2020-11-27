@@ -1,8 +1,11 @@
 import misc.Comparison;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import utilities.I18NUtility;
 import utilities.RegexUtility;
 
 import java.util.ArrayList;
@@ -12,15 +15,22 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 class RegexUtilityTest {
-
+    private final Logger logger = LogManager.getLogger(RegexUtilityTest.class);
     @Test
     void testMatches() {
+        String patternString="\\d+\\s+\\S+";
+        String stringInput="1290 TestString";
         Assertions.assertTrue(
             RegexUtility.matches(
-                    "\\d+\\s+\\S+",
+                    patternString,
                     0,
-                    "1290 TestString"),
-            "Regex should've matched the provided string."
+                    stringInput
+            ),
+                I18NUtility.getFormattedString(
+                        "test.RegexUtilityTest.noMatchesFoundForStringMessage",
+                        stringInput,
+                        patternString
+                )
         );
     }
 
@@ -48,7 +58,13 @@ class RegexUtilityTest {
 
         actualMatches = RegexUtility.getAllMatches(pattern, 0, input);
 
-        Assertions.assertNotNull(actualMatches, "No matches found, RegexUtility.getFirstNMatches() returned null.");
+        Assertions.assertNotNull(actualMatches,
+                I18NUtility.getFormattedString(
+                "test.RegexUtilityTest.noMatchesFoundForStringMessage",
+                    input,
+                    pattern
+                )
+        );
         expectedMinusActual = new ArrayList<>(expectedMatches);
         actualMatches.stream()
             .filter(actualMatch -> expectedMinusActual.indexOf(actualMatch) >= 0)
@@ -57,8 +73,25 @@ class RegexUtilityTest {
         expectedMatches.stream()
             .filter(expectedMatch -> actualMinusExpected.indexOf(expectedMatch) >= 0)
             .forEach(expectedMatch -> actualMinusExpected.remove(actualMinusExpected.indexOf(expectedMatch)));
-        Assertions.assertEquals(0, expectedMinusActual.size(), "Actual matches don't contain all expected matches.\nExpectedMatches - ActualMatches = " + expectedMinusActual + "\n");
-        Assertions.assertEquals(0, actualMinusExpected.size(), "Expected matches don't contain all actual matches.\nActualMatches - ExpectedMatches = " + actualMinusExpected + "\n");
+
+        Assertions.assertEquals(
+                0,
+                expectedMinusActual.size(),
+                I18NUtility.getFormattedString(
+                        "test.RegexUtilityTest.failedAssertEqualityForRegexMatches",
+                        expectedMatches.toString(),
+                        actualMatches.toString()
+                )
+        );
+        Assertions.assertEquals(
+                0,
+                actualMinusExpected.size(),
+                I18NUtility.getFormattedString(
+                        "test.RegexUtilityTest.failedAssertEqualityForRegexMatches",
+                        expectedMatches.toString(),
+                        actualMatches.toString()
+                )
+        );
     }
 
     /**
@@ -89,8 +122,11 @@ class RegexUtilityTest {
             String generatedString = RegexUtility.fillRandomValues(regexToTest, 100);
             Assertions.assertTrue(
                     Pattern.matches(regexToTest, generatedString),
-                    String.format("Unable generate a string matching the supplied regex.\nRegex : %s\nGenerated " +
-                            "string : %s", regexToTest, generatedString)
+                    I18NUtility.getFormattedString(
+                            "test.RegexUtilityTest.failedToGenerateStringFromRegexMessage",
+                            regexToTest,
+                            generatedString
+                    )
             );
         }
     }
@@ -100,7 +136,7 @@ class RegexUtilityTest {
     void testProbeRegexField() {
         List<String> dataValuesToProbe = Arrays.asList("192.168.1.1", "1.1.1.1");
         for (String dataValueToProbe : dataValuesToProbe) {
-            System.out.println(Arrays.toString(RegexUtility.probeRegexField(dataValueToProbe).toArray()));
+            logger.debug(Arrays.toString(RegexUtility.probeRegexField(dataValueToProbe).toArray()));
         }
     }
 

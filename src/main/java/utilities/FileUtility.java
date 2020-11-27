@@ -209,6 +209,7 @@ public class FileUtility {
                                 Files.createDirectories(folderPath);
                             } catch (IOException e) {
                                 logger.error(e);
+                                throw new RuntimeException(e);
                             }
                         }
                 );
@@ -235,6 +236,7 @@ public class FileUtility {
                                 Files.setPosixFilePermissions(node, permissions);
                             } catch (IOException e) {
                                 logger.error(e);
+                                throw new RuntimeException(e);
                             }
                         });
             }
@@ -242,6 +244,7 @@ public class FileUtility {
                 Files.setPosixFilePermissions(path, permissions);
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -284,6 +287,7 @@ public class FileUtility {
             contents = searchTree ? Files.walk(path) : Files.list(path);
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         if (Files.isDirectory(path)) {
             matchList.addAll(
@@ -324,6 +328,7 @@ public class FileUtility {
             }
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -382,6 +387,7 @@ public class FileUtility {
                         Files.setAttribute(content, attribute.name(), attribute.value());
                     } catch (IOException e) {
                         logger.error(e);
+                        throw new RuntimeException(e);
                     }
                 });
     }
@@ -703,6 +709,7 @@ public class FileUtility {
                         watchServiceToRemove.close();
                     } catch (IOException e) {
                         logger.error(e);
+                        throw new RuntimeException(e);
                     }
                 });
     }

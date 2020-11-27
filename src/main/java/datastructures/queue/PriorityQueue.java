@@ -1,9 +1,15 @@
 package datastructures.queue;
 
 import datastructures.list.Node;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
 
 public class PriorityQueue<T1,T2 extends Comparable<T2>> extends Queue<T1>{
+
 	boolean max_val_high_priority;
+	private final Logger logger = LogManager.getLogger(PriorityQueue.class);
+
 	public PriorityQueue(boolean max_val_high_priority) {
 		super();
 		this.max_val_high_priority = max_val_high_priority;
@@ -48,7 +54,9 @@ public class PriorityQueue<T1,T2 extends Comparable<T2>> extends Queue<T1>{
 			}
 		}
 		else {
-			System.err.println("Invalid index for insertion.");
+			logger.error(
+					I18NUtility.getString("datastructures.invalidIndexInsertionErrorMessage")
+			);
 		}
 	}
 	

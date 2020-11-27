@@ -2,9 +2,14 @@ package datastructures.stack;
 
 import datastructures.list.LinkedList;
 import datastructures.list.Node;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
 
 public class Stack<T> extends LinkedList<T> {
+
 	Node<T> last_node;
+	private final Logger logger = LogManager.getLogger(Stack.class);
 	public Stack() {
 		super();
 	}
@@ -22,7 +27,9 @@ public class Stack<T> extends LinkedList<T> {
 	
 	public T pop() {
 		if(last_node == null) {
-			System.err.println("Empty Stack, Nothing to pop!");
+			logger.error(
+					I18NUtility.getString("datastructures.Stack.popFromEmptyStackMessage")
+			);
 			return null;
 		}
 		else {

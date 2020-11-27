@@ -168,11 +168,11 @@ public class RegexUtility {
                 .filter(regexField -> RegexUtility.matches(regexField.getRegex(), 0, data))
                 .collect(Collectors.toList());
         logger.debug(
-                String.format(
-                        "Data %s may be one of the following fields - %s",
-                        data,
-                        Arrays.toString(regexFields.toArray())
-                )
+                    I18NUtility.getFormattedString(
+                            "utilities.RegexUtility.possibleRegexFieldsForData",
+                            data,
+                            Arrays.toString(regexFields.toArray())
+                    )
         );
         return regexFields;
     }
@@ -186,10 +186,11 @@ public class RegexUtility {
                         )
                 );
         logger.debug(
-                String.format("Generated string (%s) of length %d from character set [%s]",
-                    buffer.toString(),
-                    length,
-                    characterSet
+                I18NUtility.getFormattedString(
+                        "utilities.RegexUtility.generatedStringFromCharacterSet",
+                        buffer.toString(),
+                        length,
+                        characterSet
                 )
         );
         return buffer.toString();

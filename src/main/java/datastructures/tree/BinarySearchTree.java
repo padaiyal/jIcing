@@ -1,7 +1,13 @@
 package datastructures.tree;
 import misc.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
 
 public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
+
+	private final Logger logger = LogManager.getLogger(BinarySearchTree.class);
+
 	public BinarySearchTree(T value) {
 		super(value);
 		// TODO Auto-generated constructor stub
@@ -14,7 +20,9 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 	}
 	public void addChildNode(T child_value) {
 		if(value.equals(child_value))
-			System.err.println("Value already present in BST");
+			logger.error(
+					I18NUtility.getString("datastructures.BinarySearchTree.valueExistInBSTMessage")
+			);
 		else {
 			if(TypeIndependentOperations.compare(child_value, value) == Comparison.LESSER) {
 				if(children[0]==null) {
@@ -51,8 +59,14 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 					children[1]=null;
 				}
 			}
-			else
-				System.err.println("Value "+node_value+"is the only element left in the tree and cannot be deleted.");
+			else {
+				logger.error(
+						I18NUtility.getFormattedString(
+								"datastructures.BinarySearchTree.deleteLastElementInBSTMessage",
+								node_value
+						)
+				);
+			}
 		}
 		else if(TIO.compare(node_value,value) == Comparison.GREATER) {
 			if(children[1]!=null) {
@@ -62,8 +76,14 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 				else
 					children[1].delete(node_value);
 			}
-			else
-				System.err.println("Value "+node_value+" not found.");
+			else {
+				logger.error(
+						I18NUtility.getFormattedString(
+								"datastructures.valueNotFoundMessage",
+								node_value
+						)
+				);
+			}
 		}
 		else if(TIO.compare(node_value,value) == Comparison.LESSER) {
 			if(children[0]!=null) {
@@ -74,7 +94,12 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 					children[0].delete(node_value);
 			}
 			else
-				System.err.println("Value "+node_value+" not found.");
+				logger.error(
+						I18NUtility.getFormattedString(
+								"datastructures.valueNotFoundMessage",
+								node_value
+						)
+				);
 		}
 		// fill in the code for delete
 
@@ -88,13 +113,13 @@ public class BinarySearchTree<T extends Comparable<T>> extends BinaryTree<T> {
 			if(right!=null)
 				return right.find(n);
 			else
-				System.err.println("Not found!");
+				logger.error("Not found!");
 		}
 		else if(n<value) {
 			if(left!=null)
 				return left.find(n);
 			else
-				System.err.println("Not found!");
+				logger.error("Not found!");
 		}
 		return null;
 	}

@@ -4,9 +4,15 @@ import java.util.List;
 
 import misc.Comparison;
 import misc.TypeIndependentOperations;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
+
 public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 
 	List<T> sorted_node_values;
+	private final Logger logger = LogManager.getLogger(AVLTree.class);
+
 	public AVLTree(T value) {
 		super(value);
 		sorted_node_values = new ArrayList<T>();
@@ -16,7 +22,12 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 	
 	public void delete(T node_value) {  
 		if(find(node_value)==-1)
-			System.out.println("Value to be deleted not found.");
+			logger.error(
+					I18NUtility.getFormattedString(
+							"datastructures.valueNotFoundMessage",
+							node_value
+					)
+			);
 		else {
 			sorted_node_values.remove(find(node_value));
 			buildAVLTreeFromSortedList(sorted_node_values);
@@ -25,10 +36,11 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 	
 	public void addChildNode(T child_value) {
 		if(getInsertionIndex(child_value)==-1)
-			System.out.println("Value already present.");
+			logger.debug(
+					I18NUtility.getString("datastructures.valueAlreadyPresentMessage")
+			);
 		else {
 			sorted_node_values.add(getInsertionIndex(child_value), child_value);
-			System.out.println("Sorted List - "+sorted_node_values.toString());
 			buildAVLTreeFromSortedList(sorted_node_values);
 		}
 		//Should insert and balance
@@ -44,7 +56,13 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 		buildBalancedTree(centre_index+1,sorted_node_values.size()-1);
 	}
 	public void buildBalancedTree(int start_index,int end_index) {
-		System.out.println("start index - "+start_index+", end_index - "+end_index);
+		logger.debug(
+				I18NUtility.getFormattedString(
+						"datastructures.AVLTree.createBalancedTreeWithIndexesMessage",
+						start_index,
+						end_index
+				)
+		);
 		if(start_index == end_index) {
 			super.addChildNode(sorted_node_values.get(start_index));
 		}
@@ -59,11 +77,17 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 			buildBalancedTree(centre_index+1, end_index);
 		}
 		else {
-			System.err.println("Lolz - "+start_index+","+end_index);
+			logger.error(
+					I18NUtility.getFormattedString(
+							"datastructures.AVLTree.failedToCreateBalancedTreeMessage",
+							start_index,
+							end_index
+					)
+			);
 		}
 	}
 	/*public void buildBalancedTree(List<T> sorted_node_values_temp) {
-		System.out.println("Building Balanced Tree - "+sorted_node_values_temp.toString());
+		logger.info("Building Balanced Tree - "+sorted_node_values_temp.toString());
 		if(sorted_node_values_temp.size()>2) {
 			int centre_index = (int)Math.floor(sorted_node_values_temp.size()/2),
 					first_subset_center_index = (int)Math.floor(centre_index/2),
@@ -78,8 +102,8 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T>{
 		}
 		else {
 			for(T node:sorted_node_values_temp) {
-				System.out.println("Adding "+node.toString()+" to the AVL Tree..");
-				System.out.println("Length of Array - "+children.length);
+				logger.info("Adding "+node.toString()+" to the AVL Tree..");
+				logger.info("Length of Array - "+children.length);
 				super.addChildNode(node);
 			}
 			sorted_node_values_temp.clear();
