@@ -62,6 +62,7 @@ class FileUtilityTest {
             Files.createDirectories(testBedPath);
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         // Create 2 folders with a txt file in each with the same name of the folder - folders1 to folders2
         // Create 2 folders with a txt file in each with the same name of the folder - folder1 to folder2
@@ -75,6 +76,7 @@ class FileUtilityTest {
                             Files.createFile(testBedPath.resolve(baseName+i).resolve(baseName+i+".txt"));
                         } catch (IOException e) {
                             logger.error(e);
+                            throw new RuntimeException(e);
                         }
                     })
             );
@@ -101,6 +103,7 @@ class FileUtilityTest {
             Files.createFile(testBedPath.resolve("folders2").resolve("fileToDelete.txt"));
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -137,9 +140,11 @@ class FileUtilityTest {
                     | ShellUtility.ShellNotFoundException
                     | ShellUtility.OsNotFoundException e) {
                 logger.error(e);
+                throw new RuntimeException(e);
             }
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
 
         }
     }
@@ -168,6 +173,7 @@ class FileUtilityTest {
             Assertions.assertEquals(0, folderPaths.size());
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         finally {
             clearTestBed();
@@ -186,6 +192,7 @@ class FileUtilityTest {
             folderDeleted = !Files.exists(path);
         } catch (Exception e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         finally {
             clearTestBed();
@@ -231,6 +238,7 @@ class FileUtilityTest {
         }
         catch(Exception e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         finally {
             // Cleanup files
@@ -317,16 +325,20 @@ class FileUtilityTest {
             actualResult = Boolean.TRUE;
         } catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         } finally {
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
             permissions.add(PosixFilePermission.OWNER_WRITE);
             FileUtility.setPermissions(folderPath, permissions, false);
 
             FileUtility.deleteRecursively(folderPath);
-            Assertions.assertTrue(actualResult,
-                "Able to create "
-                    .concat(filePath.toString())
-                    .concat(". Failed to set READ ONLY permission to ".concat(folderPath.toString())));
+            Assertions.assertTrue(
+                    actualResult,
+                    I18NUtility.getFormattedString(
+                            "test.FileUtilityTest.failedToSetReadOnlyPermissionToCreatedFileErrorMessage",
+                            folderPath.toAbsolutePath().toString()
+                    )
+            );
             clearTestBed();
         }
     }
@@ -944,6 +956,7 @@ class FileUtilityTest {
                         }
                     } catch (IOException | InterruptedException e) {
                         logger.error(e);
+                        throw new RuntimeException(e);
                     }
                 }
             );

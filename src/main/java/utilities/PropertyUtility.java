@@ -11,7 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PropertyUtility {
-
+    /**
+     * Note: Cannot internationalize PropertyUtility class because I18NUtility class depends on this.
+     */
     private static final Logger logger = LogManager.getLogger(PropertyUtility.class);
     private static final Set<String> propertyFileNames = Collections.synchronizedSet(new HashSet<>());
     private static final Set<Properties> propertyFiles = Collections.synchronizedSet(new HashSet<>());
@@ -35,6 +37,7 @@ public class PropertyUtility {
                                 propertyFile.load(inputStream);
                             } catch (IOException e) {
                                 logger.error(e);
+                                throw new RuntimeException(e);
                             }
                             return propertyFile;
                         })

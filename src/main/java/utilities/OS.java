@@ -18,7 +18,12 @@ public enum OS {
     public static OS getOs() {
         String osString = System.getProperty("os.name")
                 .toUpperCase();
-        logger.debug("OS string: " + osString);
+        logger.debug(
+                I18NUtility.getFormattedString(
+                        "utilities.OS.osStringMessage",
+                        osString
+                )
+        );
         OS detectedOS;
         if(osString.contains("LINUX")) {
             detectedOS = LINUX;
@@ -32,7 +37,12 @@ public enum OS {
         else {
             detectedOS = UNKNOWN;
         }
-        logger.info("OS detected: " + detectedOS);
+        logger.info(
+                I18NUtility.getFormattedString(
+                        "utilities.OS.osDetectedMessage",
+                        detectedOS
+                )
+        );
         return detectedOS;
     }
 }

@@ -1,12 +1,24 @@
 package datastructures.list;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
+
 public class DoublyLinkedList<T> extends LinkedList<T> {
+
+	private final Logger logger = LogManager.getLogger(DoublyLinkedList.class);
+
 	public DoublyLinkedList() {
 		// TODO Auto-generated constructor stub
 	}
 	public void removeNextNode(Node<T> temp) {
 		Node<T> temp1;
-		System.out.println("Removing node after "+temp.value);
+		logger.debug(
+				I18NUtility.getFormattedString(
+						"datastructures.Node.removeNodeInfo",
+						temp.value
+				)
+		);
 		((DoublyLinkedNode<T>)(temp.getNextNode())).previous_node = null;
 		temp1 = temp.getNextNode();
 		temp.setNextNode(temp.getNextNode().getNextNode());

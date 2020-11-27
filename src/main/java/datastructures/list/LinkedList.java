@@ -1,8 +1,14 @@
 package datastructures.list;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utilities.I18NUtility;
 
 public class LinkedList<T> implements List<T> {
+
+	private final Logger logger = LogManager.getLogger(LinkedList.class);
 	protected Node<T> first_node;
 	protected int size;
+
 	public LinkedList() {
 		first_node = null;
 		size = 0;
@@ -16,7 +22,9 @@ public class LinkedList<T> implements List<T> {
 				return temp.getValue();
 			temp = temp.getNextNode();
 		}
-		System.err.println("Invalid Index");
+		logger.error(
+				I18NUtility.getFormattedString("datastructures.invalidIndexBasicErrorMessage")
+		);
 		return null;
 		
 	}
@@ -30,7 +38,9 @@ public class LinkedList<T> implements List<T> {
 				return temp;
 			temp = temp.getNextNode();
 		}
-		System.err.println("Invalid Index");
+		logger.error(
+				I18NUtility.getFormattedString("datastructures.invalidIndexBasicErrorMessage")
+		);
 		return null;
 		
 	}
@@ -51,7 +61,9 @@ public class LinkedList<T> implements List<T> {
 			}
 		}
 		else {
-			System.err.println("Invalid index for insertion.");
+			logger.error(
+					I18NUtility.getString("datastructures.invalidIndexInsertionErrorMessage")
+			);
 		}
 	}
 	@Override
@@ -108,7 +120,9 @@ public class LinkedList<T> implements List<T> {
 			}
 		}
 		else {
-			System.err.println("Invalid index for Deletion.");
+			logger.error(
+					I18NUtility.getString("datastructures.invalidIndexDeletionErrorMessage")
+			);
 		}
 		
 	}

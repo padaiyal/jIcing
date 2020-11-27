@@ -34,6 +34,7 @@ public class StreamUtility {
         }
         catch (IOException e) {
             logger.error(e);
+            throw new RuntimeException(e);
         }
         return result;
     }
