@@ -6,7 +6,7 @@
 
     <groupId>org.java</groupId>
     <artifactId>icing</artifactId>
-    <version>2020.11.19</version>
+    <version>2020.12.15</version>
 
     <properties>
         <maven.compiler.target>14</maven.compiler.target>
@@ -30,7 +30,7 @@
         <repository>
             <id>github</id>
             <name>java-icing MVN package deployment</name>
-            <url>https://maven.pkg.github.com/the-c0d3br34k3r/java-icing</url>
+            <url>https://maven.pkg.github.com/padaiyal/jIcing</url>
         </repository>
     </distributionManagement>
 
